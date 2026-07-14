@@ -25,10 +25,11 @@ jobs:
       - name: Extract issue number from branch name
         id: extract_issue_number
         run: |
-          BRANCH_NAME="${{ github.head_ref }}"
-          ISSUE_NUMBER=$(echo "$BRANCH_NAME" | grep -oP '(?<=v[0-9]+\.[0-9]+\.)[0-9]+')
+          BRANCH_NAME="${{ github.head_ref }}" 
           
-          if [[ -z "$ISSUE_NUMBER" ]]; then
+          ISSUE_NUMBER=$(echo "$BRANCH_NAME" | sed -E 's|^feat/v[0-9]+\.[0-9]+\.([0-9]+)-.*$|\1|')
+          
+          if [[ "$ISSUE_NUMBER" == "$BRANCH_NAME" ]]; then
             echo "No issue number found in branch name: $BRANCH_NAME"
             exit 1
           fi
