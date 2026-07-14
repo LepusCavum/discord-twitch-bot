@@ -27,18 +27,18 @@ jobs:
         run: |
           BRANCH_NAME="${{ github.head_ref }}" 
           
-          ISSUE_NUMBER=$(echo "$BRANCH_NAME" | sed -E 's|^feat/v[0-9]+\.[0-9]+\.([0-9]+)-.*$|\1|')
-          
-          if [[ "$ISSUE_NUMBER" == "$BRANCH_NAME" ]]; then
-            echo "No issue number found in branch name: $BRANCH_NAME"
-            exit 1
+          if [[ "$BRANCH_NAME" =~ ^feat/v[0-9]+\.[0-9]+\.([0-9]+)- ]]; then
+              ISSUE_NUMBER="${BASH_REMATCH[1]}"
+          else
+              echo "No issue number found in branch name: $BRANCH_NAME"
+              exit 1
           fi
 
           echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
       - name: Get issue ID
         id: issue_id
         run: |
-          ISSUE_ID=${ gh issue view ${{ steps.extract_issue_number.outputs.issue_number }} --json id -q .id }
+          ISSUE_ID=${ gh issue view ${{ steps.extract_issue_number.outputs.issue_number }} --json id --jq .id }
           echo "issue_id=$ISSUE_ID" >> $GITHUB_OUTPUT
       - name: Find project item ID
         id: project_item_id
