@@ -22,6 +22,8 @@ jobs:
       - name: Authenticate GitHub CLI
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Extract issue number from branch name
         id: extract_issue_number
         run: |
@@ -79,6 +81,8 @@ jobs:
               echo "No project item found for issue #${{ steps.extract_issue_number.outputs.issue_number }}"
               exit 1
             fi
+
+            echo "item_id=$ITEM_ID" >> $GITHUB_OUTPUT
       - name: Move issue to Code Review column
         env:
           PROJECT_ID: ${{ vars.PROJECT_ID }}
