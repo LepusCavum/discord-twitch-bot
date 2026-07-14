@@ -38,7 +38,7 @@ jobs:
       - name: Get issue ID
         id: issue_id
         run: |
-          ISSUE_ID=${ gh issue view ${{ steps.extract_issue_number.outputs.issue_number }} --json id --jq '.id' }
+          ISSUE_ID=$( gh issue view ${{ steps.extract_issue_number.outputs.issue_number }} --json id --jq '.id' )
           echo "issue_id=$ISSUE_ID" >> $GITHUB_OUTPUT
       - name: Find project item ID
         id: project_item_id
@@ -72,8 +72,8 @@ jobs:
                   }
                 }
               }
-            }' -f projectId=PVT_kwHOBTTGOM4Bcvby \
-            --jq  ".data.node.items.nodes[] | select(.content.number == "42") | .id")
+            }' -f projectId=$PROJECT_ID \
+            --jq  ".data.node.items.nodes[] | select(.content.number == $ISSUE_ID) | .id")
 
             if [[ -z "$ITEM_ID" ]]; then
               echo "No project item found for issue #${{ steps.extract_issue_number.outputs.issue_number }}"
