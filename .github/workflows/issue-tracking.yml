@@ -38,7 +38,7 @@ jobs:
       - name: Get issue ID
         id: issue_id
         run: |
-          ISSUE_ID=${ gh issue view ${{ steps.extract_issue_number.outputs.issue_number }} --json id --jq .id }
+          ISSUE_ID=${ gh issue view ${{ steps.extract_issue_number.outputs.issue_number }} --json id --jq '.id' }
           echo "issue_id=$ISSUE_ID" >> $GITHUB_OUTPUT
       - name: Find project item ID
         id: project_item_id
