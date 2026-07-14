@@ -1,0 +1,93 @@
+name: Issue Tracking Automation
+
+on:
+  pull_request:
+    types:
+      - opened
+      - ready_for_review
+      - synchronize #Temporary addition for testing purposes, remove later
+
+permissions:
+  contents: read
+  issues: write
+  repository-projects: write
+
+jobs:
+  move-issue-to-review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Verify GitHub CLI
+        run: gh --version
+      - name: Authenticate GitHub CLI
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+      - name: Extract issue number from branch name
+        id: extract_issue_number
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          ISSUE_NUMBER=$(echo "$BRANCH_NAME" | grep -oP '(?<=v[0-9]+\.[0-9]+\.)[0-9]+')
+          
+          if [[ -z "$ISSUE_NUMBER" ]]; then
+            echo "No issue number found in branch name: $BRANCH_NAME"
+            exit 1
+          fi
+
+          echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
+      - name: Get issue ID
+        id: issue_id
+        run: |
+          ISSUE_ID=${ gh issue view ${{ steps.extract_issue_number.outputs.issue_number }} --json id -q .id }
+          echo "issue_id=$ISSUE_ID" >> $GITHUB_OUTPUT
+      - name: Find project item ID
+        id: project_item_id
+        env:
+          PROJECT_ID: ${{ vars.PROJECT_ID }}
+          ISSUE_ID: ${{ steps.issue_id.outputs.issue_id }}
+        run: |
+          ITEM_ID=$(gh api graphql -f query='
+            query($projectId: ID!) {
+              node(id: $projectId) {
+                ... on ProjectV2 {
+                  items(first: 100) {
+                    nodes {
+                      id
+                      content {
+                        __typename
+                        ... on Issue {
+                          id
+                          number
+                          title
+                          url
+                        }
+                        ... on PullRequest {
+                          id
+                          number
+                          title
+                          url
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }' -f projectId=PVT_kwHOBTTGOM4Bcvby \
+            --jq  ".data.node.items.nodes[] | select(.content.number == "42") | .id")
+
+            if [[ -z "$ITEM_ID" ]]; then
+              echo "No project item found for issue #${{ steps.extract_issue_number.outputs.issue_number }}"
+              exit 1
+            fi
+      - name: Move issue to Code Review column
+        env:
+          PROJECT_ID: ${{ vars.PROJECT_ID }}
+          STATUS_FIELD_ID: ${{ vars.STATUS_FIELD_ID }}
+          STATUS_CODE_REVIEW_ID: ${{ vars.STATUS_CODE_REVIEW_ID }}
+          ITEM_ID: ${{ steps.project_item_id.outputs.item_id }}
+        run: |
+          echo "Moving issue #${{ steps.extract_issue_number.outputs.issue_number }} to Code Review column..."
+          gh project item-edit \
+            --project "$PROJECT_ID" \
+            --item-id "$ITEM_ID" \
+            --field "$STATUS_FIELD_ID"
+            --single-select-option-id "$STATUS_CODE_REVIEW_ID"
