@@ -90,5 +90,5 @@ jobs:
           echo "Moving issue #${{ steps.extract_issue_number.outputs.issue_number }} to Code Review column..."
           gh project item-edit \
             --id "$ITEM_ID" \
-            --field "$STATUS_FIELD_ID" \
+            --field-id "$STATUS_FIELD_ID" \
             --single-select-option-id "$STATUS_CODE_REVIEW_ID"
