@@ -23,7 +23,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          echo "$GH_TOKEN" | gh auth login --with-token
+          echo "Using GH_PAT for GitHub CLI authentication"
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Extract issue number from branch name
@@ -52,7 +52,7 @@ jobs:
         env:
           PROJECT_ID: ${{ vars.PROJECT_ID }}
           ISSUE_ID: ${{ steps.issue_id.outputs.issue_id }}
-          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           ITEM_ID=$(gh api graphql -f query='
             query($projectId: ID!) {
