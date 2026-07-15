@@ -21,7 +21,7 @@ jobs:
         run: gh --version
       - name: Authenticate GitHub CLI
         env:
-          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           echo "$GH_TOKEN" | gh auth login --with-token
       - name: Checkout repository
@@ -43,7 +43,7 @@ jobs:
         id: issue_id
         env:
           GH_REPO: ${{ github.repository }}
-          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           ISSUE_ID=$(gh issue view ${{ steps.extract_issue_number.outputs.issue_number }} --repo '$GH_REPO' --json id --jq '.id')
           echo "issue_id=$ISSUE_ID" >> $GITHUB_OUTPUT
@@ -95,7 +95,7 @@ jobs:
           STATUS_FIELD_ID: ${{ vars.STATUS_FIELD_ID }}
           STATUS_CODE_REVIEW_ID: ${{ vars.STATUS_CODE_REVIEW_ID }}
           ITEM_ID: ${{ steps.project_item_id.outputs.item_id }}
-          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           echo "Moving issue #${{ steps.extract_issue_number.outputs.issue_number }} to Code Review column..."
           gh project item-edit \
