@@ -81,6 +81,9 @@ jobs:
           echo "Debug: raw project payload"
           echo "$PROJECT_DATA"
 
+          echo "Debug: content of nodes"
+          echo "$PROJECT_DATA" | jq '.data.node.items.nodes[] | .content'
+          
           ITEM_ID=$(echo "$PROJECT_DATA" | jq -r "select(.content.number == \"$ISSUE_ID\") | .id")
 
           if [[ -z "$ITEM_ID" ]]; then
