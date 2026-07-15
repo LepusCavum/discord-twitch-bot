@@ -51,7 +51,7 @@ jobs:
         id: project_item_id
         env:
           PROJECT_ID: ${{ vars.PROJECT_ID }}
-          ISSUE_ID: ${{ steps.issue_id.outputs.issue_id }}
+          ISSUE_ID: ${{ steps.extract_issue_number.outputs.issue_number }}
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           ITEM_ID=$(gh api graphql -f query='
@@ -61,19 +61,11 @@ jobs:
                   items(first: 100) {
                     nodes {
                       id
-                      content {
-                        __typename
+                      content {                        
                         ... on Issue {
                           id
                           number
                           title
-                          url
-                        }
-                        ... on PullRequest {
-                          id
-                          number
-                          title
-                          url
                         }
                       }
                     }
