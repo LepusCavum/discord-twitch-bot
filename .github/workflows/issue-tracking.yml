@@ -80,6 +80,10 @@ jobs:
           echo "Debug: raw project payload"
           echo "$PROJECT_DATA"
 
+          PROJ_DATA_2=$(echo "$PROJECT_DATA" | jq -r ".data.node.items.nodes[]")
+          echo "$PROJ_DATA_2"
+
+          PROJ_DATA_3=$(echo "$PROJ_DATA_2" | jq -r "select(.content.number == \"$ISSUE_ID\")")
           ITEM_ID=$(echo "$PROJECT_DATA" | jq -r ".data.node.items.nodes[] | select(.content.number == \"$ISSUE_ID\") | .id")
 
           if [[ -z "$ITEM_ID" ]]; then
