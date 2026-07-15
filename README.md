@@ -34,4 +34,24 @@ References #<Issue#>
 
 <Anything reviewers should know about implementation decisions, tradeoffs, or follow-up work.>
 ```
+Code Review Format:
+```
+Acceptance Criteria:
+- [ ] AC1 from Issue
+- [ ] AC2 from Issue
+- [ ] AC3 from Issue
+etc...
+
+Manual Verification:
+- [ ] Step 1 from Issue
+- [ ] Step 2 from Issue
+- [ ] Step 3 from Issue
+etc...
+
+Notes
+<Any additional comments.>
+
+Criteria met/failed. PR can/can NOT be merged.
+```
+
 PR Merge Acceptance comment: `[Approved](link_to_approval_comment_in_Issue)`
