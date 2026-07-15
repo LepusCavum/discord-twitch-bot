@@ -20,8 +20,10 @@ jobs:
       - name: Verify GitHub CLI
         run: gh --version
       - name: Authenticate GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+          echo "$GH_TOKEN" | gh auth login --with-token
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Extract issue number from branch name
@@ -39,14 +41,18 @@ jobs:
           echo "issue_number=$ISSUE_NUMBER" >> $GITHUB_OUTPUT
       - name: Get issue ID
         id: issue_id
+        env:
+          GH_REPO: ${{ github.repository }}
+          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
         run: |
-          ISSUE_ID=$( gh issue view ${{ steps.extract_issue_number.outputs.issue_number }} --json id --jq '.id' )
+          ISSUE_ID=$(gh issue view ${{ steps.extract_issue_number.outputs.issue_number }} --repo '$GH_REPO' --json id --jq '.id')
           echo "issue_id=$ISSUE_ID" >> $GITHUB_OUTPUT
       - name: Find project item ID
         id: project_item_id
         env:
           PROJECT_ID: ${{ vars.PROJECT_ID }}
           ISSUE_ID: ${{ steps.issue_id.outputs.issue_id }}
+          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
         run: |
           ITEM_ID=$(gh api graphql -f query='
             query($projectId: ID!) {
@@ -77,22 +83,23 @@ jobs:
             }' -f projectId=$PROJECT_ID \
             --jq  ".data.node.items.nodes[] | select(.content.number == $ISSUE_ID) | .id")
 
-            if [[ -z "$ITEM_ID" ]]; then
-              echo "No project item found for issue #${{ steps.extract_issue_number.outputs.issue_number }}"
-              exit 1
-            fi
+          if [[ -z "$ITEM_ID" ]]; then
+            echo "No project item found for issue #${{ steps.extract_issue_number.outputs.issue_number }}"
+            exit 1
+          fi
 
-            echo "item_id=$ITEM_ID" >> $GITHUB_OUTPUT
+          echo "item_id=$ITEM_ID" >> $GITHUB_OUTPUT
       - name: Move issue to Code Review column
         env:
           PROJECT_ID: ${{ vars.PROJECT_ID }}
           STATUS_FIELD_ID: ${{ vars.STATUS_FIELD_ID }}
           STATUS_CODE_REVIEW_ID: ${{ vars.STATUS_CODE_REVIEW_ID }}
           ITEM_ID: ${{ steps.project_item_id.outputs.item_id }}
+          GH_TOKEN: ${{ secrets.GH_PAT || github.token }}
         run: |
           echo "Moving issue #${{ steps.extract_issue_number.outputs.issue_number }} to Code Review column..."
           gh project item-edit \
             --project "$PROJECT_ID" \
             --item-id "$ITEM_ID" \
-            --field "$STATUS_FIELD_ID"
+            --field "$STATUS_FIELD_ID" \
             --single-select-option-id "$STATUS_CODE_REVIEW_ID"
