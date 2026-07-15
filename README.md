@@ -16,7 +16,7 @@ PR Body:
 
 ## Related Issue
 
-References #<Issue#>
+Related To #<Issue#>
 
 ## Changes Made
 
