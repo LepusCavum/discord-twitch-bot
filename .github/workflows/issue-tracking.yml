@@ -76,7 +76,7 @@ jobs:
                 }
               }
             }' -f projectId="$PROJECT_ID" \
-            --jq ".data.node.items.nodes[])
+            --jq ".data.node.items.nodes[]")
 
           echo "Debug: raw project payload"
           echo "$PROJECT_DATA"
