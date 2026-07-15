@@ -54,7 +54,10 @@ jobs:
           ISSUE_ID: ${{ steps.extract_issue_number.outputs.issue_number }}
           GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
-          ITEM_ID=$(gh api graphql -f query='
+          echo "Debug: project_id=$PROJECT_ID"
+          echo "Debug: issue_number=$ISSUE_ID"
+
+          PROJECT_DATA=$(gh api graphql -f query='
             query($projectId: ID!) {
               node(id: $projectId) {
                 ... on ProjectV2 {
@@ -72,8 +75,12 @@ jobs:
                   }
                 }
               }
-            }' -f projectId="$PROJECT_ID" \
-            --jq ".data.node.items.nodes[] | select(.content.number == \"$ISSUE_ID\") | .id")
+            }' -f projectId="$PROJECT_ID")
+
+          echo "Debug: raw project payload"
+          echo "$PROJECT_DATA"
+
+          ITEM_ID=$(echo "$PROJECT_DATA" | jq -r ".data.node.items.nodes[] | select(.content.number == \"$ISSUE_ID\") | .id")
 
           if [[ -z "$ITEM_ID" ]]; then
             echo "No project item found for issue #${{ steps.extract_issue_number.outputs.issue_number }}"
