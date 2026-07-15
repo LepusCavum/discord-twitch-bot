@@ -83,15 +83,12 @@ jobs:
           echo "item_id=$ITEM_ID" >> $GITHUB_OUTPUT
       - name: Move issue to Code Review column
         env:
-          PROJECT_ID: ${{ vars.PROJECT_ID }}
           STATUS_FIELD_ID: ${{ vars.STATUS_FIELD_ID }}
           STATUS_CODE_REVIEW_ID: ${{ vars.STATUS_CODE_REVIEW_ID }}
           ITEM_ID: ${{ steps.project_item_id.outputs.item_id }}
-          GH_TOKEN: ${{ secrets.GH_PAT }}
         run: |
           echo "Moving issue #${{ steps.extract_issue_number.outputs.issue_number }} to Code Review column..."
           gh project item-edit \
-            --project "$PROJECT_ID" \
-            --item-id "$ITEM_ID" \
+            --id "$ITEM_ID" \
             --field "$STATUS_FIELD_ID" \
             --single-select-option-id "$STATUS_CODE_REVIEW_ID"
