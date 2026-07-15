@@ -81,7 +81,7 @@ jobs:
           echo "Debug: raw project payload"
           echo "$PROJECT_DATA"
 
-          ITEM_ID=$(echo "$PROJECT_DATA" | jq -r ".data.node.items.nodes[] | select(.content.number == \"$ISSUE_ID\") | .id")
+          ITEM_ID=$(echo "$PROJECT_DATA" | jq -r "select(.content.number == \"$ISSUE_ID\") | .id")
 
           if [[ -z "$ITEM_ID" ]]; then
             echo "No project item found for issue #${{ steps.extract_issue_number.outputs.issue_number }}"
