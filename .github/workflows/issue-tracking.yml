@@ -84,7 +84,9 @@ jobs:
           echo "Debug: content of nodes"
           echo "$PROJECT_DATA" | jq '.content.number'
 
-          ITEM_ID=$(echo "$PROJECT_DATA" | jq -r "select(.content.number == \"$ISSUE_ID\") | .id")
+          ITEM_ID=$(echo "$PROJECT_DATA" | jq -r "select(.content.number == $ISSUE_ID) | .id")
+
+          echo "Debug: item_id=$ITEM_ID"
 
           if [[ -z "$ITEM_ID" ]]; then
             echo "No project item found for issue #${{ steps.extract_issue_number.outputs.issue_number }}"
