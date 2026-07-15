@@ -82,7 +82,7 @@ jobs:
           echo "$PROJECT_DATA"
 
           echo "Debug: content of nodes"
-          echo "$PROJECT_DATA" | jq '.content'
+          echo "$PROJECT_DATA" | jq '.content.number'
 
           ITEM_ID=$(echo "$PROJECT_DATA" | jq -r "select(.content.number == \"$ISSUE_ID\") | .id")
 
