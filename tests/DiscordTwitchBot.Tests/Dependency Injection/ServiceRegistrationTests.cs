@@ -16,7 +16,7 @@ public class ServiceRegistrationTests
         var provider = services.BuildServiceProvider(); // creates the DI container
 
         // Act
-        var startupService = provider.GetService<StartupService>(); // try to resolve the service
+        var startupService = provider.GetRequiredService<StartupService>(); // try to resolve the service
 
         // Assert
         Assert.NotNull(startupService); // Did it build successfully?
