@@ -1,14 +1,17 @@
-﻿// using DiscordTwitchBot.DependencyInjection;
-// using DiscordTwitchBot.Services;
-// using Microsoft.Extensions.DependencyInjection;
+﻿using DiscordTwitchBot.DependencyInjection;
+using DiscordTwitchBot.Services;
+using Microsoft.Extensions.DependencyInjection;
 
-// var services = new ServiceCollection(); 
+var services = new ServiceCollection(); 
 
-// services.AddBotServices(); 
+services.AddBotServices(); 
 
-// var serviceProvider = services.BuildServiceProvider();
+using var serviceProvider = services.BuildServiceProvider(); // "using" ensures that the service provider is disposed of properly when done
 
-// var startupService = serviceProvider.GetRequiredService<StartupService>();
+var startupService = serviceProvider.GetRequiredService<StartupService>();
 
-// Console.WriteLine("StartupService resolved successfully: " + (startupService != null));
-Console.WriteLine("Hello, Discord Twitch Bot!");
+Console.WriteLine("StartupService resolved successfully: " + (startupService != null));
+if (startupService != null)
+{
+    startupService.Start();
+}
