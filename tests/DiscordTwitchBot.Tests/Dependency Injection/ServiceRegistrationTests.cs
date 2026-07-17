@@ -21,4 +21,17 @@ public class ServiceRegistrationTests
         // Assert
         Assert.NotNull(startupService); // Did it build successfully?
     }
+
+    [Fact]
+    public void StartupService_ShouldThrow_WhenNotRegistered()
+    {
+        // Arrange
+        var services = new ServiceCollection(); // creates DI container registration area
+        // Note: We are NOT calling AddBotServices() here, so StartupService is not registered.
+        
+        var provider = services.BuildServiceProvider(); // creates the DI container
+
+        // Act & Assert
+        Assert.Throws<InvalidOperationException>(() => provider.GetRequiredService<StartupService>());
+    }
 }
