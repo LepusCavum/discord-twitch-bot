@@ -47,19 +47,6 @@ jobs:
         run: |
           ISSUE_ID=$(gh issue view ${{ steps.extract_issue_number.outputs.issue_number }} --repo "$GH_REPO" --json id --jq '.id')
           echo "issue_id=$ISSUE_ID" >> $GITHUB_OUTPUT
-      - name: Associate Issue to PR
-        env:
-          ISSUE_ID: ${{ steps.issue_id.outputs.issue_id }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          GH_REPO: ${{ github.repository }}
-          GH_TOKEN: ${{ secrets.GH_PAT }}
-        run: |
-          echo "Associating issue #${{ steps.extract_issue_number.outputs.issue_number }} with PR #$PR_NUMBER..."
-          gh api -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            /repos/$GH_REPO/issues/$ISSUE_ID/assignees \
-            -f assignees="$PR_NUMBER"
       - name: Find project item ID
         id: project_item_id
         env:
