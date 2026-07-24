@@ -17,7 +17,7 @@ so that
 
 ## Acceptance Criteria
 
-- 
+1. 
 
 ---
 
@@ -28,7 +28,7 @@ so that
 
 ## Tasks
 
-- 
+1. 
 
 ---
 
@@ -36,8 +36,8 @@ so that
 
 ### Automated Tests
 
-- 
+1. 
 
 ### Manual Verification
 
--
+1. 
