@@ -9,14 +9,14 @@ public class StartupServiceTests
 {
     // This test verifies there are no exceptions when the StartupService.StartAsync is called
     [Fact]
-    public void StartupService_ShouldCompleteSuccessfully()
+    public async Task StartAsync_CompletesSuccessfully()
     {
         var host = Host.CreateApplicationBuilder().Build();
         // Arrange
         var startupService = new StartupService(host.Services.GetRequiredService<IHostApplicationLifetime>());
 
         // Act
-        var exception = Record.ExceptionAsync(() => startupService.StartAsync(CancellationToken.None));
+        var exception = await Record.ExceptionAsync(() => startupService.StartAsync(CancellationToken.None));
 
         // Assert
         Assert.Null(exception);
