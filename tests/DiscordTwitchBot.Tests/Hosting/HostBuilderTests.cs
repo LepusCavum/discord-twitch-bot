@@ -76,6 +76,6 @@ public class HostBuilderTests
         await host.StopAsync(); // Stop the host, which should trigger the ApplicationStopping event
 
         // Assert
-        Assert.True(cancellationToken.IsCancellationRequested, "Expected cancellation token to be requested after stopping the host");
+        Assert.True(cancellationToken.IsCancellationRequested);
     }
 }
