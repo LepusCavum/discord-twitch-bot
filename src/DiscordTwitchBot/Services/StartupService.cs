@@ -2,7 +2,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace DiscordTwitchBot.Services;
 
-public class StartupService
+public class StartupService : IStartupService
 {
     
     private readonly IHostApplicationLifetime _applicationLifetime;

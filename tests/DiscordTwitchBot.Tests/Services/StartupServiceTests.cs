@@ -16,7 +16,7 @@ public class StartupServiceTests
         var startupService = new StartupService(host.Services.GetRequiredService<IHostApplicationLifetime>());
 
         // Act
-        var exception = await Record.ExceptionAsync(() => startupService.StartAsync(CancellationToken.None));
+        var exception = Record.ExceptionAsync(() => startupService.StartAsync(CancellationToken.None));
 
         // Assert
         Assert.Null(exception);
