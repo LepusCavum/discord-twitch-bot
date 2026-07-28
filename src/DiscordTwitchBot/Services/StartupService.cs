@@ -2,6 +2,9 @@ using Microsoft.Extensions.Hosting;
 
 namespace DiscordTwitchBot.Services;
 
+// <summary>
+// Represents a service that handles startup operations for the bot application.
+// </summary>
 public class StartupService : IStartupService
 {
     
