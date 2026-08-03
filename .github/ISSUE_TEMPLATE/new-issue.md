@@ -6,6 +6,7 @@ labels: ''
 assignees: ''
 
 ---
+Issues: Issue <Issue#>: <message>
 
 ## User Story
 
