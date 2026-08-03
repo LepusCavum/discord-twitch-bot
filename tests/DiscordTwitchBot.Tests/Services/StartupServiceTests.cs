@@ -1,19 +1,25 @@
+using DiscordTwitchBot.Hosting;
 using DiscordTwitchBot.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace DiscordTwitchBot.Tests.Services;
 
 public class StartupServiceTests
 {
+    // This test verifies there are no exceptions when the StartupService.StartAsync is called
     [Fact]
-    public void StartupService_ShouldCompleteSuccessfully()
+    public async Task StartAsync_CompletesSuccessfully()
     {
+        var host = Host.CreateApplicationBuilder().Build();
         // Arrange
-        var startupService = new StartupService();
+        var startupService = new StartupService(host.Services.GetRequiredService<IHostApplicationLifetime>());
 
         // Act
-        var exception = Record.Exception(() => startupService.Start()); // Ensure starting does not throw an exception
+        var exception = await Record.ExceptionAsync(() => startupService.StartAsync(CancellationToken.None));
 
         // Assert
-        Assert.Null(exception); // Ensure no exception was thrown during the method call
+        Assert.Null(exception);
     }
+
 }
