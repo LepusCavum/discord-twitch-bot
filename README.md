@@ -8,7 +8,6 @@ Issues: `Issue <Issue#>: <message>`
 
 PR Title: `PR <Issue#>: <Issue Title>` 
 
-```
 Code Review Format:
 ```
 Acceptance Criteria:
