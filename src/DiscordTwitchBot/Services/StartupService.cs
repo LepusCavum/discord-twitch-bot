@@ -23,7 +23,7 @@ public class StartupService : IStartupService
     {
         _applicationLifetime.ApplicationStopping.Register(() => Console.WriteLine($"Cancellation requested? {cancellationToken.IsCancellationRequested}"));
         _applicationLifetime.ApplicationStopped.Register(() => Console.WriteLine($"Cancellation requested? {cancellationToken.IsCancellationRequested}"));
-
+        
         Console.WriteLine($"StartupService: Started. Cancellation requested? {cancellationToken.IsCancellationRequested}");
 
         return Task.CompletedTask;
