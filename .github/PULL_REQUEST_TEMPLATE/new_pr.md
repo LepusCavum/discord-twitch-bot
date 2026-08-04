@@ -1,4 +1,4 @@
-PR Title: PR <Issue#>: <Issue Title>
+PR Title: `PR <Issue#>: <Issue Title>`
 
 ## Summary
 
