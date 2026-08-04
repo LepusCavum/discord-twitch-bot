@@ -65,7 +65,7 @@ public class HostBuilderTests
     public async Task StartAsync_ReceivesCancellationTokenOnShutdown()
     {
         // Arrange
-        var host = Host.CreateApplicationBuilder().Build();
+        using var host = BotHost.Create();
         var lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
         var cancellationToken = lifetime.ApplicationStopping;
         

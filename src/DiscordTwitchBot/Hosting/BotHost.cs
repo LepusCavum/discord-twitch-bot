@@ -1,4 +1,5 @@
 using DiscordTwitchBot.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 namespace DiscordTwitchBot.Hosting;
@@ -15,6 +16,10 @@ public static class BotHost
     public static IHost Create()
     {
         var builder = Host.CreateApplicationBuilder(); // Create the host builder
+
+        builder.Configuration
+            .SetBasePath(AppContext.BaseDirectory) // Set the base path for configuration files
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false); // Load configuration from appsettings.json
 
         builder.Services.AddBotServices(); // Register bot services using the extension method
 
