@@ -1,6 +1,7 @@
 using DiscordTwitchBot.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace DiscordTwitchBot.Tests.Services;
 
@@ -12,7 +13,8 @@ public class StartupServiceTests
     {
         var host = Host.CreateApplicationBuilder().Build();
         // Arrange
-        var startupService = new StartupService(host.Services.GetRequiredService<IHostApplicationLifetime>());
+        var startupService = new StartupService(host.Services.GetRequiredService<IHostApplicationLifetime>(),
+            host.Services.GetRequiredService<ILogger<StartupService>>());
 
         // Act
         var exception = await Record.ExceptionAsync(() => startupService.StartAsync(CancellationToken.None));
