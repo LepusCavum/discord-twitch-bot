@@ -2,13 +2,13 @@ using DiscordTwitchBot.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DiscordTwitchBot.Tests.Configuration;
+namespace DiscordTwitchBot.Tests.Hosting;
 
-public class ConfigurationTests
+public class HostConfigurationTests
 {
     // This test verifies that the IConfiguration service can be resolved from the host's service provider.
     [Fact]
-    public void Configuration_CanResolveIConfiguration()
+    public void HostConfiguration_CanResolveIConfiguration()
     {
         // Arrange
         using var host = BotHost.Create();
@@ -22,7 +22,7 @@ public class ConfigurationTests
     
     // This test verifies that the application name is correctly loaded from the appsettings.json configuration file.
     [Fact]
-    public void Configuration_LoadsApplicationNameFromAppSettings()
+    public void HostConfiguration_LoadsApplicationNameFromAppSettings()
     {
         // Arrange
         using var host = BotHost.Create();
