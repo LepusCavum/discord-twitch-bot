@@ -12,10 +12,10 @@ public static class LoggingExtensions
 
         if (environment.IsDevelopment())
         {
-            //ConfigureDevelopment(logging); // Add development-specific logging configuration here
+            ConfigureDevelopment(logging); // Add development-specific logging configuration here
         } else if (environment.IsProduction())
         {
-            //ConfigureProduction(logging); // Add production-specific logging configuration here
+            ConfigureProduction(logging); // Add production-specific logging configuration here
         }
 
         return logging;

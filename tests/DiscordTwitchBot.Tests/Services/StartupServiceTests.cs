@@ -14,7 +14,7 @@ public class StartupServiceTests
         var host = Host.CreateApplicationBuilder().Build();
         // Arrange
         var startupService = new StartupService(host.Services.GetRequiredService<IHostApplicationLifetime>(),
-            host.Services.GetRequiredService<ILogger<StartupService>>());
+            host.Services.GetRequiredService<ILogger<StartupService>>(), host.Services.GetRequiredService<IHostEnvironment>());
 
         // Act
         var exception = await Record.ExceptionAsync(() => startupService.StartAsync(CancellationToken.None));

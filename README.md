@@ -29,3 +29,10 @@ Criteria met/failed. PR can/can NOT be merged.
 ```
 
 PR Merge Acceptance comment: `[Approved](link_to_approval_comment_in_Issue)`
+
+## Testing tools
+DOTNET_ENVIRONMENT=Development dotnet run
+DOTNET_ENVIRONMENT=Production dotnet run
+
+echo 'export MY_VAR="value"' >> ~/.bashrc
+source ~/.bashrc
