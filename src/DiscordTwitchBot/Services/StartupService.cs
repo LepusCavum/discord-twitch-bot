@@ -41,7 +41,7 @@ public class StartupService : IStartupService
 
             return Task.CompletedTask;
         } catch (Exception ex) {
-            _logger.LogError(ex, "Application startup failed.");
+            _logger.LogError(ex, "Application startup failed during {StartupStage}.", "StartupService.StartAsync");
             throw;
         }
     }
