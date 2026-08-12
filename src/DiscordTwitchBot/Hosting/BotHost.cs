@@ -1,4 +1,5 @@
 using DiscordTwitchBot.DependencyInjection;
+using DiscordTwitchBot.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
@@ -20,6 +21,8 @@ public static class BotHost
         builder.Configuration
             .SetBasePath(AppContext.BaseDirectory) // Set the base path for configuration files
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false); // Load configuration from appsettings.json
+
+        builder.Logging.AddLogging(builder.Environment); // Configure logging using the extension method
 
         builder.Services.AddBotServices(); // Register bot services using the extension method
 

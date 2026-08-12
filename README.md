@@ -11,15 +11,15 @@ PR Title: `PR <Issue#>: <Issue Title>`
 Code Review Format:
 ```
 Acceptance Criteria:
-- [ ] AC1 from Issue
-- [ ] AC2 from Issue
-- [ ] AC3 from Issue
+1. [ ] AC1 from Issue
+2. [ ] AC2 from Issue
+3. [ ] AC3 from Issue
 etc...
 
 Manual Verification:
-- [ ] Step 1 from Issue
-- [ ] Step 2 from Issue
-- [ ] Step 3 from Issue
+1. [ ] Step 1 from Issue
+2. [ ] Step 2 from Issue
+3. [ ] Step 3 from Issue
 etc...
 
 Notes
@@ -29,3 +29,11 @@ Criteria met/failed. PR can/can NOT be merged.
 ```
 
 PR Merge Acceptance comment: `[Approved](link_to_approval_comment_in_Issue)`
+
+## Testing tools
+
+DOTNET_ENVIRONMENT=Development dotnet run
+DOTNET_ENVIRONMENT=Production dotnet run
+
+echo 'export MY_VAR="value"' >> ~/.bashrc
+source ~/.bashrc

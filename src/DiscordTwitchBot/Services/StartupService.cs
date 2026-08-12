@@ -1,4 +1,6 @@
+using System.Reflection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace DiscordTwitchBot.Services;
 
@@ -9,10 +11,15 @@ public class StartupService : IStartupService
 {
     
     private readonly IHostApplicationLifetime _applicationLifetime;
+    private readonly ILogger<StartupService> _logger;
+    private readonly IHostEnvironment _environment;
 
-    public StartupService(IHostApplicationLifetime applicationLifetime)
+    public StartupService(IHostApplicationLifetime applicationLifetime, 
+        ILogger<StartupService> logger, IHostEnvironment environment)
     {
         _applicationLifetime = applicationLifetime;
+        _logger = logger;
+        _environment = environment;
     }
 
     // <summary>
@@ -21,11 +28,21 @@ public class StartupService : IStartupService
     // <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _applicationLifetime.ApplicationStopping.Register(() => Console.WriteLine($"Cancellation stopping? {cancellationToken.IsCancellationRequested}"));
-        _applicationLifetime.ApplicationStopped.Register(() => Console.WriteLine($"Cancellation stopped? {cancellationToken.IsCancellationRequested}"));
-        
-        Console.WriteLine($"StartupService: Started. Cancellation requested? {cancellationToken.IsCancellationRequested}");
+        try {
+            _applicationLifetime.ApplicationStopping.Register(() => _logger.LogInformation("Application is stopping. Cancellation requested? {tokenRequested}", cancellationToken.IsCancellationRequested));
+            _applicationLifetime.ApplicationStopped.Register(() => _logger.LogInformation("Application is stopped."));
+            
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
 
-        return Task.CompletedTask;
+            _logger.LogInformation("Application starting: {ApplicationName} v{Version} in {Environment}. Cancellation requested? {tokenRequested}",
+                _environment.ApplicationName, 
+                version, 
+                _environment.EnvironmentName, cancellationToken.IsCancellationRequested);
+
+            return Task.CompletedTask;
+        } catch (Exception ex) {
+            _logger.LogError(ex, "Application startup failed during {StartupStage}.", "StartupService.StartAsync");
+            throw;
+        }
     }
 }
