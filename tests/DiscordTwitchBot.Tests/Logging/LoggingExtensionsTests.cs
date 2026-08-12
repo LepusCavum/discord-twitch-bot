@@ -10,6 +10,7 @@ namespace DiscordTwitchBot.Tests.Logging;
 
 public class LoggingExtensionsTests
 {
+    [Fact]
     public void LoggingExtension_ConfiguresApplicationLogging()
     {
         // Arrange
@@ -26,6 +27,7 @@ public class LoggingExtensionsTests
 
     }
 
+    [Fact]
     public void LoggingExtension_ConfiguresDevelopmentEnvLogging()
     {
         // Arrange

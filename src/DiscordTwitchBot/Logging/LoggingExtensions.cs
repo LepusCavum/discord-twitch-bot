@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 
 namespace DiscordTwitchBot.Logging;
 
@@ -8,7 +9,12 @@ public static class LoggingExtensions
     public static ILoggingBuilder AddLogging(this ILoggingBuilder logging, IHostEnvironment environment)
     {
         logging.ClearProviders(); // Clear existing logging providers
-        logging.AddConsole(); // Add console logging provider
+        logging.AddSimpleConsole(options => // Add console logging provider
+        {
+            options.TimestampFormat = "[yyyy-MM-dd HH:mm:ss] "; // Set timestamp format for log messages
+            options.ColorBehavior = LoggerColorBehavior.Enabled; // Enable colored output in the console
+        });
+
 
         if (environment.IsDevelopment())
         {
