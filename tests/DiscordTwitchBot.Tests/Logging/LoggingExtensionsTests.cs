@@ -49,6 +49,31 @@ public class LoggingExtensionsTests
 
         // Assert
         Assert.NotNull(rule);
-        Assert.Equal(LogLevel.Debug, rule.LogLevel);
+        Assert.Equal(LogLevel.Debug, rule.LogLevel); // In development, the log level for "DiscordTwitchBot" should be Debug
+    }
+
+    [Fact]
+    public void LoggingExtension_ConfiguresProductionEnvLogging()
+    {
+        // Arrange
+        var builder = Host.CreateApplicationBuilder(
+            new HostApplicationBuilderSettings
+            {
+                EnvironmentName = Environments.Production
+            }
+        );
+        builder.Logging.SetMinimumLevel(LogLevel.None);
+
+        // Act
+        builder.Logging.AddLogging(builder.Environment);
+        using var host = builder.Build();
+        var options = host.Services.GetRequiredService<IOptions<LoggerFilterOptions>>().Value;
+        LoggerFilterRule? rule = options.Rules
+            .FirstOrDefault(rule =>
+                rule.CategoryName == "DiscordTwitchBot");
+
+        // Assert
+        Assert.NotNull(rule);
+        Assert.Equal(LogLevel.Information, rule.LogLevel); // In production, the log level for "DiscordTwitchBot" should be Information
     }
 }
