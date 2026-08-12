@@ -18,7 +18,6 @@ Closes #<Issue#>
 
 - [ ] Application builds successfully
 - [ ] Automated tests pass
-- [ ] Manual verification completed
 
 ## Notes
 
