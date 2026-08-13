@@ -6,7 +6,7 @@ namespace DiscordTwitchBot.Logging;
 
 public static class LoggingExtensions
 {
-    public static ILoggingBuilder AddLogging(this ILoggingBuilder logging, IHostEnvironment environment)
+    public static ILoggingBuilder AddLogging(this ILoggingBuilder logging, IHostEnvironment env)
     {
         logging.ClearProviders(); // Clear existing logging providers
         logging.AddSimpleConsole(options => // Add console logging provider
@@ -16,10 +16,10 @@ public static class LoggingExtensions
         });
 
 
-        if (environment.IsDevelopment())
+        if (env.IsDevelopment())
         {
             ConfigureDevelopment(logging); // Add development-specific logging configuration here
-        } else if (environment.IsProduction())
+        } else if (env.IsProduction())
         {
             ConfigureProduction(logging); // Add production-specific logging configuration here
         }
@@ -29,7 +29,6 @@ public static class LoggingExtensions
 
     public static ILoggingBuilder ConfigureDevelopment(this ILoggingBuilder logging)
     {
-        // Add development-specific logging configuration here
         logging.SetMinimumLevel(LogLevel.Warning); // Set minimum log level to Debug for development
         
         logging.AddFilter(
@@ -42,7 +41,6 @@ public static class LoggingExtensions
 
     public static ILoggingBuilder ConfigureProduction(this ILoggingBuilder logging)
     {
-        // Add production-specific logging configuration here
         logging.SetMinimumLevel(LogLevel.Warning); // Set minimum log level to Debug for development
         
         logging.AddFilter(

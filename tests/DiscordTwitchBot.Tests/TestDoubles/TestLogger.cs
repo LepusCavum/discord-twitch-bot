@@ -2,8 +2,8 @@ using Microsoft.Extensions.Logging;
 
 public sealed class TestLogger<T> : ILogger<T>
 {
-    private readonly List<LogEntry> _entries = [];
-    public IReadOnlyList<LogEntry> Entries => _entries;
+    private readonly List<TestLogEntry> _entries = [];
+    public IReadOnlyList<TestLogEntry> Entries => _entries;
     public IDisposable BeginScope<TState>(TState state)
         where TState : notnull
     {
@@ -22,7 +22,7 @@ public sealed class TestLogger<T> : ILogger<T>
         Exception? exception,
         Func<TState, Exception?, string> formatter)
     {
-        _entries.Add(new LogEntry
+        _entries.Add(new TestLogEntry
         {
             Level = logLevel,
             EventId = eventId,

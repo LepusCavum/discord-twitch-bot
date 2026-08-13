@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-public sealed class LogEntry
+public sealed class TestLogEntry
 {
     public LogLevel Level { get; init; }
 

@@ -6,8 +6,6 @@ using Microsoft.Extensions.Options;
 
 namespace DiscordTwitchBot.Tests.Logging;
 
-// TODO : WHY ARE THESE NOT BEING DETECTED?!?!?!?!
-
 public class LoggingExtensionsTests
 {
     [Fact]
