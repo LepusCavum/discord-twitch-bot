@@ -1,6 +1,8 @@
 using System.Reflection;
+using DiscordTwitchBot.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DiscordTwitchBot.Services;
 
@@ -13,13 +15,15 @@ public class StartupService : IStartupService
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly ILogger<StartupService> _logger;
     private readonly IHostEnvironment _environment;
+    private readonly IOptions<ApplicationOptions> _options;
 
     public StartupService(IHostApplicationLifetime applicationLifetime, 
-        ILogger<StartupService> logger, IHostEnvironment environment)
+        ILogger<StartupService> logger, IHostEnvironment environment, IOptions<ApplicationOptions> options)
     {
         _applicationLifetime = applicationLifetime;
         _logger = logger;
         _environment = environment;
+        _options = options;
     }
 
     // <summary>
@@ -37,7 +41,7 @@ public class StartupService : IStartupService
             _logger.LogInformation("Application starting: {ApplicationName} v{Version} in {Environment}. Cancellation requested? {tokenRequested}",
                 _environment.ApplicationName, 
                 version, 
-                _environment.EnvironmentName, cancellationToken.IsCancellationRequested);
+                _options.Value.Name, cancellationToken.IsCancellationRequested);
 
             return Task.CompletedTask;
         } catch (Exception ex) {

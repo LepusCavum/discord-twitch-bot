@@ -21,6 +21,6 @@ public class ApplicationOptionsTests
         configuration.Bind("ApplicationOptions", options);
 
         // Assert
-        Assert.Equal("TestApp", options.Name);        
+        Assert.Equal("TestApp", options.Name);
     }
 }
