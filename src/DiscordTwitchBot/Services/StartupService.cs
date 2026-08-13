@@ -7,7 +7,7 @@ namespace DiscordTwitchBot.Services;
 // <summary>
 // Represents a service that handles startup operations for the bot application.
 // </summary>
-public class StartupService : IStartupService
+public class StartupService : IStartupService, IHostedService
 {
     
     private readonly IHostApplicationLifetime _applicationLifetime;
@@ -44,5 +44,10 @@ public class StartupService : IStartupService
             _logger.LogError(ex, "Application startup failed during {StartupStage}.", "StartupService.StartAsync");
             throw;
         }
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
     }
 }

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using DiscordTwitchBot.Hosting;
+using DiscordTwitchBot.Services;
 
 namespace DiscordTwitchBot.Tests.Hosting;
 
@@ -77,5 +78,19 @@ public class HostBuilderTests
 
         // Assert
         Assert.True(cancellationToken.IsCancellationRequested);
+    }
+
+    [Fact]
+    public async Task StartupService_IsRegisteredAsHostedService()
+    {
+        // Arrange
+        using var host = BotHost.Create();
+
+        // Act
+        var hostedServices = host.Services.GetServices<IHostedService>();
+        var startupService = hostedServices.OfType<StartupService>().FirstOrDefault();
+
+        // Assert
+        Assert.NotNull(startupService); 
     }
 }
