@@ -30,7 +30,6 @@ public class StartupService : IStartupService, IHostedService
     {
         try {
             _applicationLifetime.ApplicationStopping.Register(() => _logger.LogInformation("Application is stopping. Cancellation requested? {tokenRequested}", cancellationToken.IsCancellationRequested));
-            _applicationLifetime.ApplicationStopped.Register(() => _logger.LogInformation("Application is stopped."));
             
             var version = Assembly.GetExecutingAssembly().GetName().Version;
 
@@ -48,6 +47,9 @@ public class StartupService : IStartupService, IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Application is stopped. Cancellation requested? {tokenRequested}", 
+            cancellationToken.IsCancellationRequested);
+                
         return Task.CompletedTask;
     }
 }

@@ -65,7 +65,7 @@ public class HostBuilderTests
 
     // Test to verify StartupService recieved the application shutdown cancellation token
     [Fact]
-    public async Task StartAsync_ReceivesCancellationTokenOnShutdown()
+    public async Task Host_ApplicationStoppingToken_IsCancelledWhenHostStops()
     {
         // Arrange
         using var host = BotHost.Create();
