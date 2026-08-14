@@ -63,7 +63,6 @@ public class HostBuilderTests
         Assert.NotNull(startupService);
     }
 
-    // Test to verify StartupService recieved the application shutdown cancellation token
     [Fact]
     public async Task Host_ApplicationStoppingToken_IsCancelledWhenHostStops()
     {
@@ -116,5 +115,23 @@ public class HostBuilderTests
             logger.Entries,
             log => log.Message.Contains("Application starting:")
         );
+    }
+
+    [Fact]
+    public async Task StartupService_ObservesApplicationStopping_WithoutException()
+    {
+        // Arrange
+        using var host = BotHost.Create();
+        var lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
+        var cancellationToken = lifetime.ApplicationStopping;
+        
+        await host.StartAsync(); // Start the host in the background
+
+        // Act
+        var exception = await Record.ExceptionAsync(() => host.StopAsync());
+
+        // Assert
+        Assert.Null(exception);
+        Assert.True(cancellationToken.IsCancellationRequested);
     }
 }
