@@ -1,6 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using DiscordTwitchBot.Hosting;
+using DiscordTwitchBot.Services;
+using DiscordTwitchBot.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DiscordTwitchBot.Tests.Hosting;
 
@@ -60,9 +63,8 @@ public class HostBuilderTests
         Assert.NotNull(startupService);
     }
 
-    // Test to verify StartupService recieved the application shutdown cancellation token
     [Fact]
-    public async Task StartAsync_ReceivesCancellationTokenOnShutdown()
+    public async Task Host_ApplicationStoppingToken_IsCancelledWhenHostStops()
     {
         // Arrange
         using var host = BotHost.Create();
@@ -76,6 +78,60 @@ public class HostBuilderTests
         await host.StopAsync(); // Stop the host, which should trigger the ApplicationStopping event
 
         // Assert
+        Assert.True(cancellationToken.IsCancellationRequested);
+    }
+
+    [Fact]
+    public async Task StartupService_IsRegisteredAsHostedService()
+    {
+        // Arrange
+        using var host = BotHost.Create();
+
+        // Act
+        var hostedServices = host.Services.GetServices<IHostedService>();
+        var startupService = hostedServices.OfType<StartupService>().FirstOrDefault();
+
+        // Assert
+        Assert.NotNull(startupService); 
+    }
+
+    [Fact]
+    public async Task Host_ExecutesStartupServiceStartAsync()
+    {
+        // Arrange
+        var logger = new TestLogger<StartupService>();
+        var builder = Host.CreateApplicationBuilder();
+
+        builder.Services.AddBotServices();
+        builder.Services.AddSingleton<ILogger<StartupService>>(logger);
+
+        using var host = builder.Build();
+
+        // Act
+        await host.StartAsync();
+
+        // Assert
+        Assert.Contains(
+            logger.Entries,
+            log => log.Message.Contains("Application starting:")
+        );
+    }
+
+    [Fact]
+    public async Task StartupService_ObservesApplicationStopping_WithoutException()
+    {
+        // Arrange
+        using var host = BotHost.Create();
+        var lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
+        var cancellationToken = lifetime.ApplicationStopping;
+        
+        await host.StartAsync(); // Start the host in the background
+
+        // Act
+        var exception = await Record.ExceptionAsync(() => host.StopAsync());
+
+        // Assert
+        Assert.Null(exception);
         Assert.True(cancellationToken.IsCancellationRequested);
     }
 }
