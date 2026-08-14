@@ -2,6 +2,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using DiscordTwitchBot.Hosting;
 using DiscordTwitchBot.Services;
+using DiscordTwitchBot.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DiscordTwitchBot.Tests.Hosting;
 
@@ -92,5 +94,27 @@ public class HostBuilderTests
 
         // Assert
         Assert.NotNull(startupService); 
+    }
+
+    [Fact]
+    public async Task Host_ExecutesStartupServiceStartAsync()
+    {
+        // Arrange
+        var logger = new TestLogger<StartupService>();
+        var builder = Host.CreateApplicationBuilder();
+
+        builder.Services.AddBotServices();
+        builder.Services.AddSingleton<ILogger<StartupService>>(logger);
+
+        using var host = builder.Build();
+
+        // Act
+        await host.StartAsync();
+
+        // Assert
+        Assert.Contains(
+            logger.Entries,
+            log => log.Message.Contains("Application starting:")
+        );
     }
 }
