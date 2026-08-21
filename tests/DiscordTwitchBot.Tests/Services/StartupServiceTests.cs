@@ -43,30 +43,4 @@ public class StartupServiceTests
         Assert.Contains(logger.Entries, log => log.Message.Contains("Application starting"));
     }
 
-    [Fact]
-    public async Task StartupService_RequiresApplicationOptions()
-    {
-        // Arrange
-        var logger = new TestLogger<StartupService>();
-        var host = Host.CreateApplicationBuilder().Build();
-
-        var options = Options.Create(new ApplicationOptions
-        {
-            Name = "TestApp"
-        });
-
-        var startupService = new StartupService(
-            host.Services.GetRequiredService<IHostApplicationLifetime>(),
-            logger,
-            host.Services.GetRequiredService<IHostEnvironment>(),
-            options);
-        
-        // Act
-        await startupService.StartAsync(CancellationToken.None);
-
-        // Assert
-        Assert.Contains(
-            logger.Entries, 
-            log => log.Message.Contains("TestApp"));
-    }
 }

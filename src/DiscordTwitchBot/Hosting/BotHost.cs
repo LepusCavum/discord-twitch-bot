@@ -24,7 +24,7 @@ public static class BotHost
 
         builder.Logging.AddLogging(builder.Environment); // Configure logging using the extension method
 
-        builder.Services.AddBotServices(); // Register bot services using the extension method
+        builder.Services.AddBotServices(builder.Configuration); // Register bot services using the extension method
 
         return builder.Build(); // Build and return the configured host
     }

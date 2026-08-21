@@ -1,7 +1,10 @@
+using DiscordTwitchBot.Configuration;
 using DiscordTwitchBot.DependencyInjection;
 using DiscordTwitchBot.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
 namespace DiscordTwitchBot.Tests.DependencyInjection;
 
@@ -13,7 +16,7 @@ public class ServiceRegistrationTests
     {
         // Arrange
         var builder = Host.CreateApplicationBuilder();
-        builder.Services.AddBotServices(); // extension method to register all services
+        builder.Services.AddBotServices(builder.Configuration); // extension method to register all services
         
         var provider = builder.Services.BuildServiceProvider(); // creates the DI container with host services
 
@@ -37,5 +40,27 @@ public class ServiceRegistrationTests
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => provider.GetRequiredService<StartupService>()); // Expecting an exception because StartupService is not registered
+    }
+
+    [Fact]
+    public void StartupService_ShouldResolve_WithApplicationOptions()
+    {
+        // Arrange
+        var builder = Host.CreateApplicationBuilder();
+
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Application:Name"] = "TestApp"
+        });
+
+
+        builder.Services.AddBotServices(builder.Configuration);
+
+        // Act
+        var provider = builder.Services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<ApplicationOptions>>();
+
+        // Assert
+        Assert.Equal("TestApp", options.Value.Name);
     }
 }

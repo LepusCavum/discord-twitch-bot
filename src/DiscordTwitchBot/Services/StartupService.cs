@@ -18,7 +18,8 @@ public class StartupService : IStartupService, IHostedService
     private readonly IOptions<ApplicationOptions> _options;
 
     public StartupService(IHostApplicationLifetime applicationLifetime, 
-        ILogger<StartupService> logger, IHostEnvironment environment, IOptions<ApplicationOptions> options)
+        ILogger<StartupService> logger, IHostEnvironment environment, 
+        IOptions<ApplicationOptions> options)
     {
         _applicationLifetime = applicationLifetime;
         _logger = logger;

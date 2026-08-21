@@ -1,6 +1,11 @@
+using DiscordTwitchBot.DependencyInjection;
 using DiscordTwitchBot.Hosting;
+using DiscordTwitchBot.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
+using Microsoft.VisualStudio.TestPlatform.TestHost;
 
 namespace DiscordTwitchBot.Tests.Hosting;
 
@@ -33,5 +38,54 @@ public class HostConfigurationTests
 
         // Assert
         Assert.Equal("DiscordTwitchBot", appName);
+    }
+
+    [Fact]
+    public async Task Host_StartFails_WhenAppNameIsEmpty()
+    {
+        // Arrange
+        var logger = new TestLogger<StartupService>();
+        var builder = Host.CreateApplicationBuilder();
+        
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Application:Name"] = ""
+        });
+
+        builder.Services.AddSingleton<TestLogger<StartupService>>(logger);
+        builder.Services.AddBotServices(builder.Configuration);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<OptionsValidationException>(
+            () => builder.Build().StartAsync());
+        Assert.DoesNotContain(
+            logger.Entries,
+            log => log.Message.Contains("StartupService is starting")
+        );
+    }
+
+    [Fact]
+    public async Task Host_StartFails_WhenAppNameIsMissing()
+    {
+        // Arrange
+        var logger = new TestLogger<StartupService>();
+        var builder = Host.CreateApplicationBuilder();
+        
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Application:Name"] = null
+        });
+
+        builder.Services.AddSingleton<TestLogger<StartupService>>(logger);
+        builder.Services.AddBotServices(builder.Configuration);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<OptionsValidationException>(
+            () => builder.Build().StartAsync());
+        Assert.DoesNotContain(
+            logger.Entries,
+            log => log.Message.Contains("StartupService is starting")
+        );
+
     }
 }

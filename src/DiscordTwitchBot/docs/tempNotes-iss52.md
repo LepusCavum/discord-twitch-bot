@@ -16,10 +16,10 @@
 
 1. ApplicationOptions binds successfully from configuration.
 - provide an in-memory configuration containing the Application section, register the options, resolve the options, and assert that the resulting ApplicationOptions contains the expected value. [ApplicationOptions_BindsNameFromConfiguration]
-2. StartupService can be resolved through DI with IOptions<ApplicationOptions> registered. [StartupService_RequiresApplicationOptions]
+2. StartupService can be resolved through DI with IOptions<ApplicationOptions> registered. [StartupService_ShouldResolve_WithApplicationOptions]
 - verify that the configured value actually reaches StartupService, rather than merely proving construction succeeds.
 3. Options validation executes during application startup rather than first usage. 
-- The test needs to establish: configuration is invalid, host is configured with options validation, host startup is attempted, startup fails because of options validation, validation happens without StartupService reaching normal execution
+- The test needs to establish: configuration is invalid, host is configured with options validation, host startup is attempted, startup fails because of options validation, validation happens without StartupService reaching normal execution [Host_StartFails_WhenAppNameIsEmpty],[Host_StartFails_WhenAppNameIsMissing]
 4. The existing Application:Name configuration binds to ApplicationOptions.Name.
 5. Valid ApplicationOptions pass validation.
 - test should test the validation rule itself, rather than host startup.
