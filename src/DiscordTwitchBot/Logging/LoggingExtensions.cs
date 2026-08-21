@@ -15,7 +15,6 @@ public static class LoggingExtensions
             options.ColorBehavior = LoggerColorBehavior.Enabled; // Enable colored output in the console
         });
 
-
         if (env.IsDevelopment())
         {
             ConfigureDevelopment(logging); // Add development-specific logging configuration here

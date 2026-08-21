@@ -13,6 +13,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBotServices(this IServiceCollection services)
     {
         services.AddSingleton<IStartupService, StartupService>(); // Register StartupService as a singleton implementation of IStartupService
+        services.AddHostedService<StartupService>(); // Register StartupService as a hosted service
 
         return services;
     }
