@@ -17,7 +17,7 @@ Closes #<Issue#>
 ## Testing Completed
 
 - [ ] Application builds successfully
-- [ ] Automated tests pass
+- [ ] All automated tests passing: 
 
 ## Notes
 

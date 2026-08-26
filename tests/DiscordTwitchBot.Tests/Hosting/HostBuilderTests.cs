@@ -102,7 +102,7 @@ public class HostBuilderTests
         var logger = new TestLogger<StartupService>();
         var builder = Host.CreateApplicationBuilder();
 
-        builder.Services.AddBotServices();
+        builder.Services.AddBotServices(builder.Configuration);
         builder.Services.AddSingleton<ILogger<StartupService>>(logger);
 
         using var host = builder.Build();
