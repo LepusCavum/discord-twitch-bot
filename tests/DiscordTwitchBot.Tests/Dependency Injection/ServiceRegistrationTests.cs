@@ -59,6 +59,29 @@ public class ServiceRegistrationTests
         // Act
         var provider = builder.Services.BuildServiceProvider();
         var options = provider.GetRequiredService<IOptions<ApplicationOptions>>();
+        var startupService = provider.GetRequiredService<IStartupService>(); 
+
+        // Assert
+        Assert.Equal("TestApp", options.Value.Name);
+        Assert.NotNull(startupService);
+        Assert.IsType<StartupService>(startupService);
+    }
+
+    [Fact]
+    public void AddBotServices_RegistersBoundApplicationOptions()
+    {
+        // Arrange
+        var builder = Host.CreateApplicationBuilder();
+
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Application:Name"] = "TestApp"
+        });
+        builder.Services.AddBotServices(builder.Configuration);
+
+        // Act
+        var provider = builder.Services.BuildServiceProvider();
+        var options = provider.GetRequiredService<IOptions<ApplicationOptions>>();
 
         // Assert
         Assert.Equal("TestApp", options.Value.Name);

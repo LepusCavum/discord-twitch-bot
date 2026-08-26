@@ -41,34 +41,9 @@ public class HostConfigurationTests
     }
 
     [Fact]
-    public async Task Host_StartFails_WhenAppNameIsEmpty()
+    public async Task Host_StartFails_WhenAppNameIsInvalid()
     {
         // Arrange
-        var logger = new TestLogger<StartupService>();
-        var builder = Host.CreateApplicationBuilder();
-        
-        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
-        {
-            ["Application:Name"] = ""
-        });
-
-        builder.Services.AddSingleton<TestLogger<StartupService>>(logger);
-        builder.Services.AddBotServices(builder.Configuration);
-
-        // Act & Assert
-        await Assert.ThrowsAsync<OptionsValidationException>(
-            () => builder.Build().StartAsync());
-        Assert.DoesNotContain(
-            logger.Entries,
-            log => log.Message.Contains("StartupService is starting")
-        );
-    }
-
-    [Fact]
-    public async Task Host_StartFails_WhenAppNameIsMissing()
-    {
-        // Arrange
-        var logger = new TestLogger<StartupService>();
         var builder = Host.CreateApplicationBuilder();
         
         builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
@@ -76,16 +51,33 @@ public class HostConfigurationTests
             ["Application:Name"] = null
         });
 
-        builder.Services.AddSingleton<TestLogger<StartupService>>(logger);
         builder.Services.AddBotServices(builder.Configuration);
 
         // Act & Assert
         await Assert.ThrowsAsync<OptionsValidationException>(
             () => builder.Build().StartAsync());
+    }
+
+    [Fact]
+    public async Task Host_ValidatesOptions_DuringAppStartup()
+    {
+        // Arrange
+        var logger = new TestLogger<StartupService>();
+        var builder = Host.CreateApplicationBuilder();
+        
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["option"] = ""
+        });
+
+        builder.Services.AddSingleton<TestLogger<StartupService>>(logger);
+        builder.Services.AddBotServices(builder.Configuration);
+
+        // Act & Assert
+
         Assert.DoesNotContain(
             logger.Entries,
             log => log.Message.Contains("StartupService is starting")
         );
-
     }
 }
