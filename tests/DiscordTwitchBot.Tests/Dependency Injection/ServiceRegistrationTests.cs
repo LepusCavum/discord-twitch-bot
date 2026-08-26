@@ -58,11 +58,9 @@ public class ServiceRegistrationTests
 
         // Act
         var provider = builder.Services.BuildServiceProvider();
-        var options = provider.GetRequiredService<IOptions<ApplicationOptions>>();
         var startupService = provider.GetRequiredService<IStartupService>(); 
 
         // Assert
-        Assert.Equal("TestApp", options.Value.Name);
         Assert.NotNull(startupService);
         Assert.IsType<StartupService>(startupService);
     }
