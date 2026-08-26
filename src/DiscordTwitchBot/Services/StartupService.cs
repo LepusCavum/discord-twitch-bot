@@ -40,7 +40,7 @@ public class StartupService : IStartupService, IHostedService
             _logger.LogInformation("Application starting: {ApplicationName} v{Version} in {Environment}. App cancellation requested? {tokenRequested}",
                 _environment.ApplicationName, 
                 version, 
-                _environment.EnvironmentName, _applicationLifetime.ApplicationStopping.IsCancellationRequested);
+                _options.Value.Name, _applicationLifetime.ApplicationStopping.IsCancellationRequested);
             _logger.LogInformation("StartupService is starting. Service cancellation requested? {tokenRequested}",
                 cancellationToken.IsCancellationRequested);
 
