@@ -82,12 +82,12 @@ public class HostBuilderTests
     public void BotHost_ValidateRequiredServices_Throws_WhenIStartupServiceMissing()
     {
         // Arrange
-        var services = new ServiceCollection();
-        services.AddHostedService<StartupService>();
-        using var provider = services.BuildServiceProvider();
+        var builder = Host.CreateApplicationBuilder();
+        builder.Services.AddHostedService<StartupService>();
+        using var host = builder.Build();
 
         // Act
-        var exception = Record.Exception(() => BotHost.ValidateRequiredServices(provider));
+        var exception = Record.Exception(() => BotHost.ValidateRequiredServices(host));
 
         // Assert
         Assert.NotNull(exception);
@@ -99,12 +99,12 @@ public class HostBuilderTests
     public void BotHost_ValidateRequiredServices_Throws_WhenHostedServiceMissing()
     {
         // Arrange
-        var services = new ServiceCollection();
-        services.AddSingleton<IStartupService, StartupService>();
-        using var provider = services.BuildServiceProvider();
+        var builder = Host.CreateApplicationBuilder();
+        builder.Services.AddSingleton<IStartupService, StartupService>();
+        using var host = builder.Build();
 
         // Act
-        var exception = Record.Exception(() => BotHost.ValidateRequiredServices(provider));
+        var exception = Record.Exception(() => BotHost.ValidateRequiredServices(host));
 
         // Assert
         Assert.NotNull(exception);

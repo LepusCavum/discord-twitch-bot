@@ -46,6 +46,7 @@ public static class BotHost
         catch (InvalidOperationException ex)
         {
             logger.LogError(ex, "Required startup service registration is missing: IStartupService.");
+            throw new InvalidOperationException("Required startup service registration is missing: IStartupService.", ex);
         }
 
         var hostedServices = host.Services.GetServices<IHostedService>();
@@ -54,6 +55,7 @@ public static class BotHost
         if (startupService is null)
         {
             logger.LogError("Required hosted service registration is missing: StartupService.");
+            throw new InvalidOperationException("Required hosted service registration is missing: StartupService.");
         }
     }
 }
