@@ -4,6 +4,7 @@ using DiscordTwitchBot.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace DiscordTwitchBot.Hosting;
 
@@ -29,28 +30,30 @@ public static class BotHost
         builder.Services.AddBotServices(builder.Configuration); // Register bot services using the extension method
 
         var host = builder.Build();
-        ValidateRequiredServices(host.Services);
+        ValidateRequiredServices(host);
 
         return host; // Build and return the configured host
     }
 
-    public static void ValidateRequiredServices(IServiceProvider services)
+    public static void ValidateRequiredServices(IHost host)
     {
+        var logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("BotHost");
+
         try
         {
-            _ = services.GetRequiredService<IStartupService>();
+            _ = host.Services.GetRequiredService<IStartupService>();
         }
         catch (InvalidOperationException ex)
         {
-            throw new InvalidOperationException("Required startup service registration is missing: IStartupService.", ex);
+            logger.LogError(ex, "Required startup service registration is missing: IStartupService.");
         }
 
-        var hostedServices = services.GetServices<IHostedService>();
+        var hostedServices = host.Services.GetServices<IHostedService>();
         var startupService = hostedServices.OfType<StartupService>().FirstOrDefault();
 
         if (startupService is null)
         {
-            throw new InvalidOperationException("Required hosted service registration is missing: StartupService.");
+            logger.LogError("Required hosted service registration is missing: StartupService.");
         }
     }
 }

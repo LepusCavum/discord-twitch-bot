@@ -53,6 +53,7 @@ This document captures the current architectural and delivery decisions for the 
 ### 3.4 Logging and execution model
 
 - Structured logging is required.
+- All exceptions must be logged using the custom logging model.
 - The application uses async/await for asynchronous work.
 - The bot should avoid blocking or synchronous work in request-processing and runtime lifecycle paths.
 - Logging should be safe for production and should never emit secrets or sensitive values.
