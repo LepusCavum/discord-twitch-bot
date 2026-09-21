@@ -1,9 +1,11 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using DiscordTwitchBot.Hosting;
 using DiscordTwitchBot.Services;
 using DiscordTwitchBot.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DiscordTwitchBot.Tests.Hosting;
 
@@ -61,6 +63,74 @@ public class HostBuilderTests
 
         // Assert
         Assert.NotNull(startupService);
+    }
+
+    [Fact]
+    public async Task Host_ValidateOnStart_Succeeds_WithValidRegistrations()
+    {
+        // Arrange
+        using var host = BotHost.Create();
+
+        // Act
+        var exception = await Record.ExceptionAsync(() => host.StartAsync());
+
+        // Assert
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public void BotHost_ValidateRequiredServices_Throws_WhenIStartupServiceMissing()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddHostedService<StartupService>();
+        using var provider = services.BuildServiceProvider();
+
+        // Act
+        var exception = Record.Exception(() => BotHost.ValidateRequiredServices(provider));
+
+        // Assert
+        Assert.NotNull(exception);
+        Assert.IsType<InvalidOperationException>(exception);
+        Assert.Contains("IStartupService", exception.Message);
+    }
+
+    [Fact]
+    public void BotHost_ValidateRequiredServices_Throws_WhenHostedServiceMissing()
+    {
+        // Arrange
+        var services = new ServiceCollection();
+        services.AddSingleton<IStartupService, StartupService>();
+        using var provider = services.BuildServiceProvider();
+
+        // Act
+        var exception = Record.Exception(() => BotHost.ValidateRequiredServices(provider));
+
+        // Assert
+        Assert.NotNull(exception);
+        Assert.IsType<InvalidOperationException>(exception);
+        Assert.Contains("StartupService", exception.Message);
+    }
+
+    [Fact]
+    public async Task Host_ValidateOnStart_Fails_WhenOptionsAreInvalid()
+    {
+        // Arrange
+        var builder = Host.CreateApplicationBuilder();
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Application:Name"] = null
+        });
+
+        builder.Services.AddBotServices(builder.Configuration);
+        using var host = builder.Build();
+
+        // Act
+        var exception = await Record.ExceptionAsync(() => host.StartAsync());
+
+        // Assert
+        Assert.NotNull(exception);
+        Assert.IsType<OptionsValidationException>(exception);
     }
 
     [Fact]

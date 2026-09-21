@@ -14,10 +14,11 @@ public static class ServiceCollectionExtensions
     // <returns>The updated IServiceCollection.</returns>
     public static IServiceCollection AddBotServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // services.AddSingleton<IStartupService, StartupService>(); // Register StartupService as a singleton implementation of IStartupService
-        services.AddHostedService<StartupService>(); // Register StartupService as a hosted service
+        services.AddSingleton<StartupService>();
+        services.AddSingleton<IStartupService>(serviceProvider => serviceProvider.GetRequiredService<StartupService>());
+        services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<StartupService>());
 
-        services.AddOptions<ApplicationOptions>() 
+        services.AddOptions<ApplicationOptions>()
             .Bind(configuration.GetSection("Application"))
             .ValidateDataAnnotations()
             .ValidateOnStart();
