@@ -57,7 +57,7 @@ public class HostBuilderTests
         var host = BotHost.Create();
 
         // Act
-        var startupService = host.Services.GetRequiredService<IStartupService>();
+        var startupService = host.Services.GetRequiredService<IHostedService>();
 
         // Assert
         Assert.NotNull(startupService);
