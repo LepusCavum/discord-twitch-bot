@@ -14,9 +14,9 @@ public static class ServiceCollectionExtensions
     // <returns>The updated IServiceCollection.</returns>
     public static IServiceCollection AddBotServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // services.AddSingleton<StartupService>();
-        // services.AddSingleton<IStartupService>(serviceProvider => serviceProvider.GetRequiredService<StartupService>());
-        // services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<StartupService>());
+        services.AddSingleton<StartupService>();
+        services.AddSingleton<IStartupService>(serviceProvider => serviceProvider.GetRequiredService<StartupService>());
+        services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<StartupService>());
 
         services.AddOptions<ApplicationOptions>()
             .Bind(configuration.GetSection("Application"))
