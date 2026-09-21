@@ -58,7 +58,7 @@ public class ServiceRegistrationTests
 
         // Act
         var provider = builder.Services.BuildServiceProvider();
-        var startupService = provider.GetRequiredService<IHostedService>(); 
+        var startupService = provider.GetRequiredService<IHostedService>();
 
         // Assert
         Assert.NotNull(startupService);

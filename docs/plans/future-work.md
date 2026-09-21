@@ -10,7 +10,7 @@
         1. command permission model
         2. Discord role integration
         3. user-based permissions
-        4. administrative command restrictions 
+        4. administrative command restrictions
         5. permission persistence 
 2. Future / commands
     1. /uptime
@@ -37,4 +37,4 @@
 7. Twitch rate limiting
     1. Message throttling
     2. Queue handling
-    3. Backpressure 
+    3. Backpressure

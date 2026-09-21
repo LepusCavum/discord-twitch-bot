@@ -10,7 +10,7 @@ This document describes the intended source and test layout. GitHub milestones a
 - Use one type per file unless a small private implementation is local to its owner.
 - Keep application-owned interfaces and models at the application boundary; third-party types stay inside adapters.
 - Keep tests parallel to production feature folders.
-- Use status values `Existing`, `Planned`, and `Needs decision` 
+- Use status values `Existing`, `Planned`, and `Needs decision`
 
 DiscordTwitchBot (Existing)
 ├── .github (Existing)
