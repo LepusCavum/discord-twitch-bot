@@ -31,9 +31,11 @@ Build a .NET 10 Discord bot that relays eligible Twitch chat activity to one con
 2. Confirm the work matches v1.0 scope and architecture.
 3. Identify root cause and exact behavior to change.
 4. Write or update a failing xUnit test.
-5. Implement the smallest valid fix.
-6. Run the smallest relevant verification.
-7. Refactor only if it preserves clarity and correctness.
+5. Ask for human review/approval before continuing.
+6. Implement the smallest valid fix.
+7. Run the smallest relevant verification.
+8. Refactor only if it preserves clarity and correctness.
+9. Run the full test suite to ensure nothing has broken.
 
 ## Approval Rules
 - Small, clearly scoped updates may proceed without additional approval when they remain within the current architecture and v1.0 scope.
