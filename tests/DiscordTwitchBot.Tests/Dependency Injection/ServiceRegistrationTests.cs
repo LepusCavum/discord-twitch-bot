@@ -106,5 +106,4 @@ public class ServiceRegistrationTests
         Assert.Equal("TestApp", options.Value.Name);
     }
 
-
 }
