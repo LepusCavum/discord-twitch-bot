@@ -21,16 +21,27 @@ public static class BotHost
     {
         var builder = Host.CreateApplicationBuilder(); // Create the host builder
 
+        var serviceProviderOptions = new ServiceProviderOptions
+        {
+            ValidateOnBuild = true,
+            ValidateScopes = true
+        };
+
+        builder.ConfigureContainer(
+            new DefaultServiceProviderFactory(serviceProviderOptions),
+            services => { });
+
         builder.Configuration
             .SetBasePath(AppContext.BaseDirectory) // Set the base path for configuration files
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false); // Load configuration from appsettings.json
 
+        builder.Environment.EnvironmentName = builder.Configuration["Application:Environment"] ?? "Production"; // Set the environment name from configuration or default to "Production"
         builder.Logging.AddLogging(builder.Environment); // Configure logging using the extension method
 
         builder.Services.AddBotServices(builder.Configuration); // Register bot services using the extension method
 
         var host = builder.Build();
-        ValidateRequiredServices(host);
+        ValidateRequiredServices(host); // Validate required services are registered
 
         return host; // Build and return the configured host
     }
@@ -57,5 +68,7 @@ public static class BotHost
             logger.LogError("Required hosted service registration is missing: StartupService.");
             throw new InvalidOperationException("Required hosted service registration is missing: StartupService.");
         }
+
+        logger.LogInformation("Dependency injection validation completed successfully.");
     }
 }

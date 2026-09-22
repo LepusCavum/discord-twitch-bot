@@ -66,6 +66,25 @@ public class HostBuilderTests
     }
 
     [Fact]
+    public void BotHost_LogsSuccessfulDependencyInjectionValidation()
+    {
+        // Arrange
+        var logger = new TestLogger<HostBuilderTests>();
+        var builder = Host.CreateApplicationBuilder();
+        builder.Logging.AddProvider(logger);
+        builder.Services.AddBotServices(builder.Configuration);
+        using var host = builder.Build();
+
+        // Act
+        BotHost.ValidateRequiredServices(host);
+
+        // Assert
+        Assert.Contains(
+            logger.Entries,
+            entry => entry.Message.Contains("Dependency injection validation completed successfully."));
+    }
+
+    [Fact]
     public async Task Host_ValidateOnStart_Succeeds_WithValidRegistrations()
     {
         // Arrange
@@ -204,4 +223,5 @@ public class HostBuilderTests
         Assert.Null(exception);
         Assert.True(cancellationToken.IsCancellationRequested);
     }
+
 }

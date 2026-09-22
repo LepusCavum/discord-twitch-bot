@@ -11,7 +11,7 @@
         2. Discord role integration
         3. user-based permissions
         4. administrative command restrictions
-        5. permission persistence 
+        5. permission persistence
 2. Future / commands
     1. /uptime
     2. /viewers
