@@ -31,44 +31,24 @@ public static class BotHost
             new DefaultServiceProviderFactory(serviceProviderOptions),
             services => { });
 
+        var configuredEnvironment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
+            ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+            ?? builder.Configuration["Application:Environment"]
+            ?? "Production";
+
+        builder.Environment.EnvironmentName = configuredEnvironment;
+
         builder.Configuration
             .SetBasePath(AppContext.BaseDirectory) // Set the base path for configuration files
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false); // Load configuration from appsettings.json
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false) // Load base configuration from appsettings.json
+            .AddJsonFile($"appsettings.{configuredEnvironment}.json", optional: true, reloadOnChange: false); // Load environment-specific override configuration when present
 
-        builder.Environment.EnvironmentName = builder.Configuration["Application:Environment"] ?? "Production"; // Set the environment name from configuration or default to "Production"
+        builder.Configuration["Application:Environment"] = configuredEnvironment;
+
         builder.Logging.AddLogging(builder.Environment); // Configure logging using the extension method
 
         builder.Services.AddBotServices(builder.Configuration); // Register bot services using the extension method
 
-        var host = builder.Build();
-        ValidateRequiredServices(host); // Validate required services are registered
-
-        return host; // Build and return the configured host
-    }
-
-    public static void ValidateRequiredServices(IHost host)
-    {
-        var logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("BotHost");
-
-        try
-        {
-            _ = host.Services.GetRequiredService<IStartupService>();
-        }
-        catch (InvalidOperationException ex)
-        {
-            logger.LogError(ex, "Required startup service registration is missing: IStartupService.");
-            throw new InvalidOperationException("Required startup service registration is missing: IStartupService.", ex);
-        }
-
-        var hostedServices = host.Services.GetServices<IHostedService>();
-        var startupService = hostedServices.OfType<StartupService>().FirstOrDefault();
-
-        if (startupService is null)
-        {
-            logger.LogError("Required hosted service registration is missing: StartupService.");
-            throw new InvalidOperationException("Required hosted service registration is missing: StartupService.");
-        }
-
-        logger.LogInformation("Dependency injection validation completed successfully.");
+        return builder.Build(); // Build and return the configured host
     }
 }

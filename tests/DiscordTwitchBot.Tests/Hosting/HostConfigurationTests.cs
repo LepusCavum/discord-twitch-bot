@@ -11,6 +11,31 @@ namespace DiscordTwitchBot.Tests.Hosting;
 
 public class HostConfigurationTests
 {
+    [Fact]
+    public void Host_UsesRuntimeEnvironmentVariable_ForEnvironmentName()
+    {
+        // Arrange
+        var previous = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+        Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", "Production");
+
+        try
+        {
+            using var host = BotHost.Create();
+
+            // Act
+            var environment = host.Services.GetRequiredService<IHostEnvironment>();
+            var configuration = host.Services.GetRequiredService<IConfiguration>();
+
+            // Assert
+            Assert.Equal("Production", environment.EnvironmentName);
+            Assert.Equal("Production", configuration["Application:Environment"]);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", previous);
+        }
+    }
+
     // This test verifies that the IConfiguration service can be resolved from the host's service provider.
     [Fact]
     public void HostConfiguration_CanResolveIConfiguration()
@@ -59,25 +84,22 @@ public class HostConfigurationTests
     }
 
     [Fact]
-    public async Task Host_ValidatesOptions_DuringAppStartup()
+    public async Task Host_ValidatesVersion_DuringAppStartup()
     {
         // Arrange
-        var logger = new TestLogger<StartupService>();
         var builder = Host.CreateApplicationBuilder();
         
         builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["option"] = ""
+            ["Application:Name"] = "DiscordTwitchBot",
+            ["Application:Environment"] = "Test",
+            ["Application:Version"] = null
         });
 
-        builder.Services.AddSingleton<TestLogger<StartupService>>(logger);
         builder.Services.AddBotServices(builder.Configuration);
 
         // Act & Assert
-
-        Assert.DoesNotContain(
-            logger.Entries,
-            log => log.Message.Contains("StartupService is starting")
-        );
+        using var host = builder.Build();
+        await Assert.ThrowsAsync<OptionsValidationException>(() => host.StartAsync());
     }
 }

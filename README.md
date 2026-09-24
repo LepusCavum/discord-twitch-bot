@@ -28,10 +28,12 @@ Notes
 Criteria met/failed. PR can/can NOT be merged.
 ```
 
-## Testing tools
+## Local run commands
 
-DOTNET_ENVIRONMENT=Development dotnet run
-DOTNET_ENVIRONMENT=Production dotnet run
+This project uses the .NET Generic Host, so the environment is controlled with `DOTNET_ENVIRONMENT`.
+
+DOTNET_ENVIRONMENT=Development dotnet run --project src/DiscordTwitchBot
+DOTNET_ENVIRONMENT=Production dotnet run --project src/DiscordTwitchBot
 
 echo 'export MY_VAR="value"' >> ~/.bashrc
 source ~/.bashrc

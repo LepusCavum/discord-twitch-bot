@@ -19,5 +19,5 @@ catch (Exception ex)
         ex.GetType().Name,
         ex.Message);
 
-    // throw;
+    throw;
 }
