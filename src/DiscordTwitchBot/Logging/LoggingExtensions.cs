@@ -28,7 +28,7 @@ public static class LoggingExtensions
 
     public static ILoggingBuilder ConfigureDevelopment(this ILoggingBuilder logging)
     {
-        logging.SetMinimumLevel(LogLevel.Warning); // Set minimum log level to Debug for development
+        logging.SetMinimumLevel(LogLevel.Debug); // Set minimum log level to Debug for development
         
         logging.AddFilter(
             "DiscordTwitchBot", LogLevel.Debug)
@@ -40,7 +40,7 @@ public static class LoggingExtensions
 
     public static ILoggingBuilder ConfigureProduction(this ILoggingBuilder logging)
     {
-        logging.SetMinimumLevel(LogLevel.Warning); // Set minimum log level to Debug for development
+        logging.SetMinimumLevel(LogLevel.Warning); // Set minimum log level to Warning for production
         
         logging.AddFilter(
             "DiscordTwitchBot", LogLevel.Information)

@@ -1,9 +1,21 @@
 using Microsoft.Extensions.Logging;
 
-public sealed class TestLogger<T> : ILogger<T>
+public sealed class TestLogger<T> : ILogger<T>, ILoggerProvider
 {
     private readonly List<TestLogEntry> _entries = [];
     public IReadOnlyList<TestLogEntry> Entries => _entries;
+
+    // Registering the logger as a provider lets host-created ILogger instances use this same entry collection.
+    public ILogger CreateLogger(string categoryName)
+    {
+        return this;
+    }
+
+    public void Dispose()
+    {
+    }
+
+    // Tests do not need scope state, but ILogger still requires a disposable scope object.
     public IDisposable BeginScope<TState>(TState state)
         where TState : notnull
     {

@@ -1,9 +1,11 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using DiscordTwitchBot.Hosting;
 using DiscordTwitchBot.Services;
 using DiscordTwitchBot.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DiscordTwitchBot.Tests.Hosting;
 
@@ -57,10 +59,97 @@ public class HostBuilderTests
         var host = BotHost.Create();
 
         // Act
-        var startupService = host.Services.GetRequiredService<IStartupService>();
+        var startupService = host.Services.GetRequiredService<IHostedService>();
 
         // Assert
         Assert.NotNull(startupService);
+    }
+
+    [Fact]
+    public void BotHost_LogsSuccessfulDependencyInjectionValidation()
+    {
+        // Arrange
+        var logger = new TestLogger<HostBuilderTests>();
+        var builder = Host.CreateApplicationBuilder();
+        builder.Logging.AddProvider(logger);
+        builder.Services.AddBotServices(builder.Configuration);
+        using var host = builder.Build();
+
+        // Act
+        BotHost.ValidateRequiredServices(host);
+
+        // Assert
+        Assert.Contains(
+            logger.Entries,
+            entry => entry.Message.Contains("Dependency injection validation completed successfully."));
+    }
+
+    [Fact]
+    public async Task Host_ValidateOnStart_Succeeds_WithValidRegistrations()
+    {
+        // Arrange
+        using var host = BotHost.Create();
+
+        // Act
+        var exception = await Record.ExceptionAsync(() => host.StartAsync());
+
+        // Assert
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public void BotHost_ValidateRequiredServices_Throws_WhenIStartupServiceMissing()
+    {
+        // Arrange
+        var builder = Host.CreateApplicationBuilder();
+        builder.Services.AddHostedService<StartupService>();
+        using var host = builder.Build();
+
+        // Act
+        var exception = Record.Exception(() => BotHost.ValidateRequiredServices(host));
+
+        // Assert
+        Assert.NotNull(exception);
+        Assert.IsType<InvalidOperationException>(exception);
+        Assert.Contains("IStartupService", exception.Message);
+    }
+
+    [Fact]
+    public void BotHost_ValidateRequiredServices_Throws_WhenHostedServiceMissing()
+    {
+        // Arrange
+        var builder = Host.CreateApplicationBuilder();
+        builder.Services.AddSingleton<IStartupService, StartupService>();
+        using var host = builder.Build();
+
+        // Act
+        var exception = Record.Exception(() => BotHost.ValidateRequiredServices(host));
+
+        // Assert
+        Assert.NotNull(exception);
+        Assert.IsType<InvalidOperationException>(exception);
+        Assert.Contains("StartupService", exception.Message);
+    }
+
+    [Fact]
+    public async Task Host_ValidateOnStart_Fails_WhenOptionsAreInvalid()
+    {
+        // Arrange
+        var builder = Host.CreateApplicationBuilder();
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Application:Name"] = null
+        });
+
+        builder.Services.AddBotServices(builder.Configuration);
+        using var host = builder.Build();
+
+        // Act
+        var exception = await Record.ExceptionAsync(() => host.StartAsync());
+
+        // Assert
+        Assert.NotNull(exception);
+        Assert.IsType<OptionsValidationException>(exception);
     }
 
     [Fact]
@@ -134,4 +223,5 @@ public class HostBuilderTests
         Assert.Null(exception);
         Assert.True(cancellationToken.IsCancellationRequested);
     }
+
 }

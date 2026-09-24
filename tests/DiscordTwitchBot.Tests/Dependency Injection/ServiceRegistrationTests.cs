@@ -12,7 +12,7 @@ public class ServiceRegistrationTests
 {
     // This test checks if the StartupService can be resolved from the DI container after registering services.
     [Fact] // tells xUnit that this is a test to be executed. Would be ignored without
-    public void StartupService_ShouldResolveSuccessfully()
+    public void StartupService_ShouldResolveAsHostedService()
     {
         // Arrange
         var builder = Host.CreateApplicationBuilder();
@@ -21,7 +21,7 @@ public class ServiceRegistrationTests
         var provider = builder.Services.BuildServiceProvider(); // creates the DI container with host services
 
         // Act
-        var startupService = provider.GetRequiredService<IStartupService>(); // try to resolve the service
+        var startupService = provider.GetRequiredService<IHostedService>(); // try to resolve the hosted service
 
         // Assert
         Assert.NotNull(startupService); // Did it build successfully?
@@ -58,7 +58,28 @@ public class ServiceRegistrationTests
 
         // Act
         var provider = builder.Services.BuildServiceProvider();
-        var startupService = provider.GetRequiredService<IStartupService>(); 
+        var startupService = provider.GetRequiredService<IHostedService>();
+
+        // Assert
+        Assert.NotNull(startupService);
+        Assert.IsType<StartupService>(startupService);
+    }
+
+    [Fact]
+    public void StartupService_ShouldResolve_AsApplicationContract()
+    {
+        // Arrange
+        var builder = Host.CreateApplicationBuilder();
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Application:Name"] = "TestApp"
+        });
+
+        builder.Services.AddBotServices(builder.Configuration);
+
+        // Act
+        var provider = builder.Services.BuildServiceProvider();
+        var startupService = provider.GetRequiredService<IStartupService>();
 
         // Assert
         Assert.NotNull(startupService);
@@ -84,4 +105,5 @@ public class ServiceRegistrationTests
         // Assert
         Assert.Equal("TestApp", options.Value.Name);
     }
+
 }
