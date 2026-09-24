@@ -2,7 +2,6 @@ using DiscordTwitchBot.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace DiscordTwitchBot.Tests.Logging;
 
@@ -13,16 +12,22 @@ public class LoggingExtensionsTests
     {
         // Arrange
         var builder = Host.CreateApplicationBuilder();
+        var logger = new TestLogger<LoggingExtensionsTests>();
         builder.Logging.SetMinimumLevel(LogLevel.None);
 
         // Act
         builder.Logging.AddLogging(builder.Environment);
+        builder.Logging.AddProvider(logger);
         using var host = builder.Build();
-        var options = host.Services.GetRequiredService<IOptions<LoggerFilterOptions>>().Value;
+        var categoryLogger = host.Services
+            .GetRequiredService<ILoggerFactory>()
+            .CreateLogger("Other.Component");
+        categoryLogger.LogInformation("application information");
+        categoryLogger.LogWarning("application warning");
 
         // Assert
-        Assert.Equal(LogLevel.Warning, options.MinLevel);
-
+        Assert.DoesNotContain(logger.Entries, entry => entry.Message == "application information");
+        Assert.Contains(logger.Entries, entry => entry.Level == LogLevel.Warning && entry.Message == "application warning");
     }
 
     [Fact]
@@ -35,19 +40,22 @@ public class LoggingExtensionsTests
                 EnvironmentName = Environments.Development
             }
         );
+        var logger = new TestLogger<LoggingExtensionsTests>();
         builder.Logging.SetMinimumLevel(LogLevel.None);
 
         // Act
         builder.Logging.AddLogging(builder.Environment);
+        builder.Logging.AddProvider(logger);
         using var host = builder.Build();
-        var options = host.Services.GetRequiredService<IOptions<LoggerFilterOptions>>().Value;
-        LoggerFilterRule? rule = options.Rules
-            .FirstOrDefault(rule =>
-                rule.CategoryName == "DiscordTwitchBot");
+        var categoryLogger = host.Services
+            .GetRequiredService<ILoggerFactory>()
+            .CreateLogger("DiscordTwitchBot.Test");
+        categoryLogger.LogDebug("development debug");
+        categoryLogger.LogInformation("development information");
 
         // Assert
-        Assert.NotNull(rule);
-        Assert.Equal(LogLevel.Debug, rule.LogLevel); // In development, the log level for "DiscordTwitchBot" should be Debug
+        Assert.Contains(logger.Entries, entry => entry.Level == LogLevel.Debug && entry.Message == "development debug");
+        Assert.Contains(logger.Entries, entry => entry.Level == LogLevel.Information && entry.Message == "development information");
     }
 
     [Fact]
@@ -60,18 +68,23 @@ public class LoggingExtensionsTests
                 EnvironmentName = Environments.Production
             }
         );
+        var logger = new TestLogger<LoggingExtensionsTests>();
         builder.Logging.SetMinimumLevel(LogLevel.None);
 
         // Act
         builder.Logging.AddLogging(builder.Environment);
+        builder.Logging.AddProvider(logger);
         using var host = builder.Build();
-        var options = host.Services.GetRequiredService<IOptions<LoggerFilterOptions>>().Value;
-        LoggerFilterRule? rule = options.Rules
-            .FirstOrDefault(rule =>
-                rule.CategoryName == "DiscordTwitchBot");
+        var categoryLogger = host.Services
+            .GetRequiredService<ILoggerFactory>()
+            .CreateLogger("DiscordTwitchBot.Test");
+        categoryLogger.LogDebug("production debug");
+        categoryLogger.LogInformation("production information");
+        categoryLogger.LogWarning("production warning");
 
         // Assert
-        Assert.NotNull(rule);
-        Assert.Equal(LogLevel.Information, rule.LogLevel); // In production, the log level for "DiscordTwitchBot" should be Information
+        Assert.DoesNotContain(logger.Entries, entry => entry.Message == "production debug");
+        Assert.Contains(logger.Entries, entry => entry.Level == LogLevel.Information && entry.Message == "production information");
+        Assert.Contains(logger.Entries, entry => entry.Level == LogLevel.Warning && entry.Message == "production warning");
     }
 }

@@ -84,25 +84,22 @@ public class HostConfigurationTests
     }
 
     [Fact]
-    public async Task Host_ValidatesOptions_DuringAppStartup()
+    public async Task Host_ValidatesVersion_DuringAppStartup()
     {
         // Arrange
-        var logger = new TestLogger<StartupService>();
         var builder = Host.CreateApplicationBuilder();
         
         builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            ["option"] = ""
+            ["Application:Name"] = "DiscordTwitchBot",
+            ["Application:Environment"] = "Test",
+            ["Application:Version"] = null
         });
 
-        builder.Services.AddSingleton<TestLogger<StartupService>>(logger);
         builder.Services.AddBotServices(builder.Configuration);
 
         // Act & Assert
-
-        Assert.DoesNotContain(
-            logger.Entries,
-            log => log.Message.Contains("StartupService is starting")
-        );
+        using var host = builder.Build();
+        await Assert.ThrowsAsync<OptionsValidationException>(() => host.StartAsync());
     }
 }
