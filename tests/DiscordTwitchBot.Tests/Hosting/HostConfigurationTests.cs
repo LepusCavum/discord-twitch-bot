@@ -11,6 +11,31 @@ namespace DiscordTwitchBot.Tests.Hosting;
 
 public class HostConfigurationTests
 {
+    [Fact]
+    public void Host_UsesRuntimeEnvironmentVariable_ForEnvironmentName()
+    {
+        // Arrange
+        var previous = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+        Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", "Production");
+
+        try
+        {
+            using var host = BotHost.Create();
+
+            // Act
+            var environment = host.Services.GetRequiredService<IHostEnvironment>();
+            var configuration = host.Services.GetRequiredService<IConfiguration>();
+
+            // Assert
+            Assert.Equal("Production", environment.EnvironmentName);
+            Assert.Equal("Production", configuration["Application:Environment"]);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", previous);
+        }
+    }
+
     // This test verifies that the IConfiguration service can be resolved from the host's service provider.
     [Fact]
     public void HostConfiguration_CanResolveIConfiguration()

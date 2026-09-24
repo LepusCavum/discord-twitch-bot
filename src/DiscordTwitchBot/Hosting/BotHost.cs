@@ -31,11 +31,22 @@ public static class BotHost
             new DefaultServiceProviderFactory(serviceProviderOptions),
             services => { });
 
+        var configuredEnvironment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
+            ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+            ?? builder.Configuration["Application:Environment"]
+            ?? "Production";
+
+        Console.WriteLine($"Environment: {builder.Configuration["Application:Environment"]}"); // Log the configured environment for debugging
+
+        builder.Environment.EnvironmentName = configuredEnvironment;
+
         builder.Configuration
             .SetBasePath(AppContext.BaseDirectory) // Set the base path for configuration files
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false); // Load configuration from appsettings.json
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false) // Load base configuration from appsettings.json
+            .AddJsonFile($"appsettings.{configuredEnvironment}.json", optional: true, reloadOnChange: false); // Load environment-specific override configuration when present
 
-        builder.Environment.EnvironmentName = builder.Configuration["Application:Environment"] ?? "Production"; // Set the environment name from configuration or default to "Production"
+        builder.Configuration["Application:Environment"] = configuredEnvironment;
+
         builder.Logging.AddLogging(builder.Environment); // Configure logging using the extension method
 
         builder.Services.AddBotServices(builder.Configuration); // Register bot services using the extension method
