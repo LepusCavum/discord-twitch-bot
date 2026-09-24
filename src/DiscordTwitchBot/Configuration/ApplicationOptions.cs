@@ -9,4 +9,7 @@ public class ApplicationOptions
 
     [Required (ErrorMessage = "Environment is required.")]
     public string? Environment { get; set; }
+
+    [Required (ErrorMessage = "Version is required.")]
+    public string? Version { get; set; }
 }
