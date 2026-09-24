@@ -45,6 +45,27 @@ public class StartupServiceTests
     }
 
     [Fact]
+    public async Task StartupService_LogsConfiguredVersion()
+    {
+        // Arrange
+        var logger = new TestLogger<StartupService>();
+        var host = Host.CreateApplicationBuilder().Build();
+        var configuredVersion = "9.8.7";
+        var service = new StartupService(
+            host.Services.GetRequiredService<IHostApplicationLifetime>(),
+            logger,
+            host.Services.GetRequiredService<IHostEnvironment>(),
+            Options.Create(new ApplicationOptions { Version = configuredVersion }));
+
+        // Act
+        await service.StartAsync(CancellationToken.None);
+
+        // Assert
+        var startupLog = Assert.Single(logger.Entries, log => log.EventId.Id == 1000);
+        Assert.Contains($"v{configuredVersion}", startupLog.Message);
+    }
+
+    [Fact]
     public async Task StartupService_RegistersShutdownLoggingOnlyOnce()
     {
         var logger = new TestLogger<StartupService>();

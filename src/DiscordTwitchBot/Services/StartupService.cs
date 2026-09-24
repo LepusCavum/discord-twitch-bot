@@ -1,4 +1,3 @@
-using System.Reflection;
 using DiscordTwitchBot.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -43,13 +42,10 @@ public class StartupService : IStartupService, IHostedService, IDisposable
     public Task StartAsync(CancellationToken cancellationToken)
     {
         try {
-            
-            var version = Assembly.GetExecutingAssembly().GetName().Version;
-
             _logger.LogInformation(ApplicationStartingEvent,
                 "Application starting: {ApplicationName} v{Version} in {Environment}. App cancellation requested? {tokenRequested}",
                 _environment.ApplicationName, 
-                version, 
+                _options.Value.Version,
                 _options.Value.Environment, _applicationLifetime.ApplicationStopping.IsCancellationRequested);
             _logger.LogInformation(ServiceStartingEvent,
                 "StartupService is starting. Service cancellation requested? {tokenRequested}",
