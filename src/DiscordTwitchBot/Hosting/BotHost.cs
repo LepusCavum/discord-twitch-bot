@@ -36,8 +36,6 @@ public static class BotHost
             ?? builder.Configuration["Application:Environment"]
             ?? "Production";
 
-        Console.WriteLine($"Environment: {builder.Configuration["Application:Environment"]}"); // Log the configured environment for debugging
-
         builder.Environment.EnvironmentName = configuredEnvironment;
 
         builder.Configuration
