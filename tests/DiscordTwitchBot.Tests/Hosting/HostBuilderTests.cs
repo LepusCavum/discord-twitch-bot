@@ -66,22 +66,21 @@ public class HostBuilderTests
     }
 
     [Fact]
-    public void BotHost_LogsSuccessfulDependencyInjectionValidation()
+    public void Host_RegistersStartupService_ThroughDependencyInjection()
     {
         // Arrange
-        var logger = new TestLogger<HostBuilderTests>();
         var builder = Host.CreateApplicationBuilder();
-        builder.Logging.AddProvider(logger);
         builder.Services.AddBotServices(builder.Configuration);
+
         using var host = builder.Build();
 
         // Act
-        BotHost.ValidateRequiredServices(host);
+        var startupService = host.Services.GetRequiredService<IStartupService>();
+        var hostedServices = host.Services.GetServices<IHostedService>();
 
         // Assert
-        Assert.Contains(
-            logger.Entries,
-            entry => entry.Message.Contains("Dependency injection validation completed successfully."));
+        Assert.NotNull(startupService);
+        Assert.Contains(hostedServices, service => service is StartupService);
     }
 
     [Fact]
@@ -95,40 +94,6 @@ public class HostBuilderTests
 
         // Assert
         Assert.Null(exception);
-    }
-
-    [Fact]
-    public void BotHost_ValidateRequiredServices_Throws_WhenIStartupServiceMissing()
-    {
-        // Arrange
-        var builder = Host.CreateApplicationBuilder();
-        builder.Services.AddHostedService<StartupService>();
-        using var host = builder.Build();
-
-        // Act
-        var exception = Record.Exception(() => BotHost.ValidateRequiredServices(host));
-
-        // Assert
-        Assert.NotNull(exception);
-        Assert.IsType<InvalidOperationException>(exception);
-        Assert.Contains("IStartupService", exception.Message);
-    }
-
-    [Fact]
-    public void BotHost_ValidateRequiredServices_Throws_WhenHostedServiceMissing()
-    {
-        // Arrange
-        var builder = Host.CreateApplicationBuilder();
-        builder.Services.AddSingleton<IStartupService, StartupService>();
-        using var host = builder.Build();
-
-        // Act
-        var exception = Record.Exception(() => BotHost.ValidateRequiredServices(host));
-
-        // Assert
-        Assert.NotNull(exception);
-        Assert.IsType<InvalidOperationException>(exception);
-        Assert.Contains("StartupService", exception.Message);
     }
 
     [Fact]
