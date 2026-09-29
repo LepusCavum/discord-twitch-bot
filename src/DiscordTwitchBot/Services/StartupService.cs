@@ -16,6 +16,7 @@ public class StartupService : IStartupService, IHostedService, IDisposable
     private static readonly EventId ApplicationStoppedEvent = new(1003, "ApplicationStopped");
     private static readonly EventId ServiceStoppedEvent = new(1004, "ServiceStopped");
     private static readonly EventId StartupFailedEvent = new(1005, "StartupFailed");
+    private static readonly EventId StartupValidatedEvent = new(1006, "StartupValidated");
 
     private readonly IHostApplicationLifetime _applicationLifetime;
     private readonly ILogger<StartupService> _logger;
@@ -62,6 +63,9 @@ public class StartupService : IStartupService, IHostedService, IDisposable
                         "Application is stopped. App cancellation requested? {tokenRequested}",
                         _applicationLifetime.ApplicationStopping.IsCancellationRequested));
             }
+
+            _logger.LogInformation(StartupValidatedEvent,
+                "Configuration, dependency injection, and logging initialized; application startup validation completed successfully.");
 
             return Task.CompletedTask;
         } catch (Exception ex) {
