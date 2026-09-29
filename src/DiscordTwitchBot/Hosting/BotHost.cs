@@ -19,7 +19,14 @@ public static class BotHost
     // <returns>The configured IHost instance.</returns>
     public static IHost Create()
     {
-        var builder = Host.CreateApplicationBuilder(); // Create the host builder
+        var builder = Host.CreateApplicationBuilder();
+
+        var configuredEnvironment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
+            ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+            ?? builder.Configuration["Application:Environment"]
+            ?? "Production";
+
+        builder.Environment.EnvironmentName = configuredEnvironment;
 
         var serviceProviderOptions = new ServiceProviderOptions
         {
@@ -31,18 +38,19 @@ public static class BotHost
             new DefaultServiceProviderFactory(serviceProviderOptions),
             services => { });
 
-        var configuredEnvironment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
-            ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
-            ?? builder.Configuration["Application:Environment"]
-            ?? "Production";
-
-        builder.Environment.EnvironmentName = configuredEnvironment;
+        builder.Configuration.Sources.Clear();
 
         builder.Configuration
-            .SetBasePath(AppContext.BaseDirectory) // Set the base path for configuration files
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false) // Load base configuration from appsettings.json
-            .AddJsonFile($"appsettings.{configuredEnvironment}.json", optional: true, reloadOnChange: false); // Load environment-specific override configuration when present
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
+            .AddJsonFile($"appsettings.{configuredEnvironment}.json", optional: true, reloadOnChange: false);
 
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.Configuration.AddUserSecrets<Program>(optional: true);
+        }
+
+        builder.Configuration.AddEnvironmentVariables();
         builder.Configuration["Application:Environment"] = configuredEnvironment;
 
         builder.Logging.AddLogging(builder.Environment); // Configure logging using the extension method

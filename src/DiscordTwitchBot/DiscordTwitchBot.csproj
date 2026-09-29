@@ -9,6 +9,7 @@
 
   <PropertyGroup>
     <Version>0.1.0</Version>
+    <UserSecretsId>discord-twitch-bot-user-secrets</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
