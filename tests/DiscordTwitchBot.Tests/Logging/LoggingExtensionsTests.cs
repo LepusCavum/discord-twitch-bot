@@ -1,4 +1,5 @@
 using DiscordTwitchBot.Logging;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -28,6 +29,28 @@ public class LoggingExtensionsTests
         // Assert
         Assert.DoesNotContain(logger.Entries, entry => entry.Message == "application information");
         Assert.Contains(logger.Entries, entry => entry.Level == LogLevel.Warning && entry.Message == "application warning");
+    }
+
+    [Fact]
+    public void Logging_DoesNotEmitConfiguredSecretValues()
+    {
+        // Arrange
+        var builder = Host.CreateApplicationBuilder();
+        var logger = new TestLogger<LoggingExtensionsTests>();
+        var secretValue = "sentinel-secret-value";
+
+        builder.Configuration["Feature:SecretToken"] = secretValue;
+        builder.Logging.SetMinimumLevel(LogLevel.None);
+
+        // Act
+        builder.Logging.AddLogging(builder.Environment);
+        builder.Logging.AddProvider(logger);
+        using var host = builder.Build();
+        var categoryLogger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("DiscordTwitchBot.Test");
+        categoryLogger.LogInformation("startup configuration loaded");
+
+        // Assert
+        Assert.DoesNotContain(logger.Entries, entry => entry.Message.Contains(secretValue, StringComparison.Ordinal));
     }
 
     [Fact]

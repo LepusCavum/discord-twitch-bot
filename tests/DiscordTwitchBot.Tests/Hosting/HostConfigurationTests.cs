@@ -11,6 +11,19 @@ namespace DiscordTwitchBot.Tests.Hosting;
 
 public class HostConfigurationTests
 {
+    private static void WriteUserSecret(string key, string value)
+    {
+        var appDataRoot = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        var secretDirectory = Path.Combine(appDataRoot, "Microsoft", "UserSecrets", "discord-twitch-bot-user-secrets");
+        Directory.CreateDirectory(secretDirectory);
+
+        File.WriteAllText(
+            Path.Combine(secretDirectory, "secrets.json"),
+            $"{{\"{key.Split(':')[0]}\":{{\"{key.Split(':')[1]}\":\"{value}\"}}}}");
+
+        Environment.SetEnvironmentVariable("APPDATA", appDataRoot);
+    }
+
     [Fact]
     public void Host_UsesRuntimeEnvironmentVariable_ForEnvironmentName()
     {
@@ -48,6 +61,65 @@ public class HostConfigurationTests
 
         // Assert
         Assert.NotNull(configuration);
+    }
+
+    [Fact]
+    public void Host_LoadsUserSecrets_WhenDevelopmentIsConfiguredByApplicationEnvironment()
+    {
+        // Arrange
+        var originalAppData = Environment.GetEnvironmentVariable("APPDATA");
+        var originalDotNetEnvironment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+        var originalAspNetEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+        WriteUserSecret("Feature:LocalSecret", "sentinel-secret-value");
+        Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", null);
+        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", null);
+
+        try
+        {
+            using var host = BotHost.Create();
+            var configuration = host.Services.GetRequiredService<IConfiguration>();
+
+            // Assert
+            Assert.Equal("sentinel-secret-value", configuration["Feature:LocalSecret"]);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("APPDATA", originalAppData);
+            Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", originalDotNetEnvironment);
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", originalAspNetEnvironment);
+        }
+    }
+
+    [Fact]
+    public void Host_UsesEnvironmentVariablesOverJsonAndUserSecretsValues()
+    {
+        // Arrange
+        var originalAppData = Environment.GetEnvironmentVariable("APPDATA");
+        var originalDotNetEnvironment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+        var originalAspNetEnvironment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+        var originalFeatureValue = Environment.GetEnvironmentVariable("Feature__LocalSecret");
+
+        WriteUserSecret("Feature:LocalSecret", "user-secret-value");
+        Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", "Development");
+        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", null);
+        Environment.SetEnvironmentVariable("Feature__LocalSecret", "environment-secret-value");
+
+        try
+        {
+            using var host = BotHost.Create();
+            var configuration = host.Services.GetRequiredService<IConfiguration>();
+
+            // Assert
+            Assert.Equal("environment-secret-value", configuration["Feature:LocalSecret"]);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("APPDATA", originalAppData);
+            Environment.SetEnvironmentVariable("DOTNET_ENVIRONMENT", originalDotNetEnvironment);
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", originalAspNetEnvironment);
+            Environment.SetEnvironmentVariable("Feature__LocalSecret", originalFeatureValue);
+        }
     }
     
     // This test verifies that the application name is correctly loaded from the appsettings.json configuration file.
