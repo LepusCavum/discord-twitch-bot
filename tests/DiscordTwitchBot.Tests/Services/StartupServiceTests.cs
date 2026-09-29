@@ -45,6 +45,54 @@ public class StartupServiceTests
     }
 
     [Fact]
+    public async Task StartupService_LogsSuccessfulStartupValidation()
+    {
+        // Arrange
+        var logger = new TestLogger<StartupService>();
+        var host = Host.CreateApplicationBuilder().Build();
+        var service = new StartupService(
+            host.Services.GetRequiredService<IHostApplicationLifetime>(),
+            logger,
+            host.Services.GetRequiredService<IHostEnvironment>(),
+            Options.Create(new ApplicationOptions()));
+
+        // Act
+        await service.StartAsync(CancellationToken.None);
+
+        // Assert
+        var successLog = Assert.Single(logger.Entries, log => log.EventId.Id == 1006);
+        Assert.Equal(LogLevel.Information, successLog.Level);
+        Assert.Contains("startup validation completed successfully", successLog.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("configuration", successLog.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("dependency injection", successLog.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("logging", successLog.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task StartupService_LogsStartupFailureDetails()
+    {
+        // Arrange
+        var logger = new TestLogger<StartupService>();
+        var host = Host.CreateApplicationBuilder().Build();
+        var failure = new InvalidOperationException("startup dependency unavailable");
+        var service = new StartupService(
+            new ThrowingApplicationLifetime(failure),
+            logger,
+            host.Services.GetRequiredService<IHostEnvironment>(),
+            Options.Create(new ApplicationOptions()));
+
+        // Act
+        var exception = await Record.ExceptionAsync(() => service.StartAsync(CancellationToken.None));
+
+        // Assert
+        Assert.Same(failure, exception);
+        var failureLog = Assert.Single(logger.Entries, log => log.EventId.Id == 1005);
+        Assert.Equal(LogLevel.Error, failureLog.Level);
+        Assert.Same(failure, failureLog.Exception);
+        Assert.Contains("StartupService.StartAsync", failureLog.Message);
+    }
+
+    [Fact]
     public async Task StartupService_LogsConfiguredVersion()
     {
         // Arrange

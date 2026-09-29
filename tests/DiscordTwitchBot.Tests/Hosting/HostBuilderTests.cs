@@ -87,13 +87,31 @@ public class HostBuilderTests
     public async Task Host_ValidateOnStart_Succeeds_WithValidRegistrations()
     {
         // Arrange
-        using var host = BotHost.Create();
+        var startupLogger = new TestLogger<StartupService>();
+        var builder = Host.CreateApplicationBuilder();
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Application:Name"] = "DiscordTwitchBot",
+            ["Application:Environment"] = "Test",
+            ["Application:Version"] = "0.1.0"
+        });
+        builder.Logging.AddProvider(startupLogger);
+        builder.ConfigureContainer(
+            new DefaultServiceProviderFactory(new ServiceProviderOptions
+            {
+                ValidateOnBuild = true,
+                ValidateScopes = true
+            }),
+            _ => { });
+        builder.Services.AddBotServices(builder.Configuration);
+        using var host = builder.Build();
 
         // Act
         var exception = await Record.ExceptionAsync(() => host.StartAsync());
 
         // Assert
         Assert.Null(exception);
+        Assert.Contains(startupLogger.Entries, log => log.EventId.Id == 1006);
     }
 
     [Fact]
@@ -113,8 +131,79 @@ public class HostBuilderTests
         var exception = await Record.ExceptionAsync(() => host.StartAsync());
 
         // Assert
+        var validationException = Assert.IsType<OptionsValidationException>(exception);
+        Assert.Contains(
+            validationException.Failures,
+            failure => failure.Contains("Application name is required.", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task Host_ValidateOnStart_FailsBeforeRuntimeHostedServicesStart()
+    {
+        // Arrange
+        var logger = new TestLogger<StartupService>();
+        var runtimeService = new TrackingHostedService();
+        var builder = Host.CreateApplicationBuilder();
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            ["Application:Name"] = null
+        });
+        builder.Logging.AddProvider(logger);
+        builder.Services.AddBotServices(builder.Configuration);
+        builder.Services.AddSingleton<IHostedService>(runtimeService);
+
+        using var host = builder.Build();
+
+        // Act
+        var exception = await Record.ExceptionAsync(() => host.StartAsync());
+
+        // Assert
+        var validationException = Assert.IsType<OptionsValidationException>(exception);
+        Assert.Contains(
+            validationException.Failures,
+            failure => failure.Contains("Application name is required.", StringComparison.Ordinal));
+        Assert.False(runtimeService.Started);
+        Assert.DoesNotContain(logger.Entries, log => log.EventId.Id == 1006);
+    }
+
+    [Fact]
+    public void Host_ValidateOnBuild_Fails_WhenRequiredDependencyIsUnavailable()
+    {
+        // Arrange
+        var startupLogger = new TestLogger<StartupService>();
+        var builder = Host.CreateApplicationBuilder();
+        builder.Logging.AddProvider(startupLogger);
+        builder.ConfigureContainer(
+            new DefaultServiceProviderFactory(new ServiceProviderOptions { ValidateOnBuild = true }),
+            _ => { });
+        builder.Services.AddSingleton<UnavailableDependencyConsumer>();
+
+        // Act
+        var exception = Record.Exception(() => builder.Build());
+
+        // Assert
         Assert.NotNull(exception);
-        Assert.IsType<OptionsValidationException>(exception);
+        Assert.Contains("RequiresUnavailableDependency", exception.ToString());
+        Assert.DoesNotContain(startupLogger.Entries, log => log.EventId.Id == 1006);
+    }
+
+    [Fact]
+    public async Task Host_DoesNotStartLaterHostedService_WhenEarlierHostedServiceFails()
+    {
+        // Arrange
+        var laterService = new TrackingHostedService();
+        var builder = Host.CreateApplicationBuilder();
+        builder.Services.AddHostedService<FailingHostedService>();
+        builder.Services.AddSingleton<IHostedService>(laterService);
+
+        using var host = builder.Build();
+
+        // Act
+        var exception = await Record.ExceptionAsync(() => host.StartAsync());
+
+        // Assert
+        Assert.NotNull(exception);
+        Assert.False(laterService.Started);
     }
 
     [Fact]

@@ -3,12 +3,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-using var host = BotHost.Create(); // Create and configure the host for the bot application
-
-var logger = host.Services.GetRequiredService<ILogger<Program>>();
+using var bootstrapLoggerFactory = LoggerFactory.Create(logging => logging.AddSimpleConsole());
+var logger = bootstrapLoggerFactory.CreateLogger<Program>();
 
 try
 {
+    using var host = BotHost.Create();
+    logger = host.Services.GetRequiredService<ILogger<Program>>();
     await host.RunAsync();
 }
 catch (Exception ex)
