@@ -39,6 +39,20 @@ The application does not currently read command-line configuration values, so co
 
 Never log a configured secret value. When verifying configuration, inspect the resolved value through `IConfiguration` and confirm log output does not contain the sentinel value. Missing-key validation should identify the configuration key only, not the associated value.
 
+## Continuous Integration
+
+GitHub Actions validates the project on every push to `main` and every pull request targeting `main` through `.github/workflows/verify-build-test.yml`.
+
+The workflow:
+
+1. checks out the repository,
+2. installs the repository's .NET SDK version from `global.json` (`10.0.200` with `rollForward: latestFeature`),
+3. restores dependencies,
+4. builds the application with `dotnet build --no-restore`, and
+5. runs the automated tests with `dotnet test --no-build --verbosity normal`.
+
+If the build or test step fails, the workflow fails and the pull request is marked as unsuccessful. This matches the repository's local verification flow, which is also exercised with `dotnet test --nologo`.
+
 ## Conventions:
 Branches: `feat/v<Milestone>.<Issue#>-<short-title>` 
 
